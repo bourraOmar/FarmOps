@@ -1,10 +1,39 @@
 "use client";
 
-import React from "react";
-import { Mail, Lock, LogIn, Clover } from "lucide-react";
+import React, { useState } from "react";
+import { Mail, Lock, LogIn, Clover, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    // Simulation d'authentification (À connecter avec le backend NestJS plus tard)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Fake network delay
+
+      if (email === "admin@myfarmops.app" && password === "password") {
+        console.log("Login success");
+        router.push("/dashboard");
+      } else {
+        setError("Identifiants incorrects. Essayez admin@myfarmops.app / password");
+      }
+    } catch (err) {
+      setError("Une erreur est survenue lors de la connexion.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-stretch bg-white dark:bg-gray-900 font-sans overflow-hidden">
       {/* CÔTÉ GAUCHE : IMAGE AVEC OVERLAY VERT */}
@@ -83,19 +112,29 @@ export default function LoginPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-8">
             Veuillez entrer vos identifiants pour accéder au dashboard.
           </p>
-          <form className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
+            {error && (
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium">
+                {error}
+              </div>
+            )}
+            
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
                 Email Administrateur
               </label>
               <div className="relative">
                 <Mail
-                  className="w-5 h-5 absolute left-4 top-3.5 text-gray-400 dark:text-gray-500"
+                  className="w-5 h-5 absolute left-4 top-3.5 text-gray-300"
                 />
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@myfarmops.app"
-                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-900 dark:text-white transition-all"
+                  required
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-900 dark:text-white transition-all disabled:opacity-50"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -107,27 +146,41 @@ export default function LoginPage() {
                 </label>
                 <a
                   href="#"
-                  className="text-xs font-bold text-green-600 dark:text-green-500 hover:underline"
+                  className="text-xs font-bold text-green-600 hover:underline"
                 >
                   Oublié ?
                 </a>
               </div>
               <div className="relative">
-                <Lock className="w-5 h-5 absolute left-4 top-3.5 text-gray-400 dark:text-gray-500" />
+                <Lock className="w-5 h-5 absolute left-4 top-3.5 text-gray-300" />
                 <input
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-900 dark:text-white transition-all"
+                  required
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-900 dark:text-white transition-all disabled:opacity-50"
+                  disabled={loading}
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 dark:shadow-none hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 dark:shadow-none hover:bg-green-700 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Se connecter
-              <LogIn className="w-5 h-5" />
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Connexion...
+                </>
+              ) : (
+                <>
+                  Se connecter
+                  <LogIn className="w-5 h-5" />
+                </>
+              )}
             </button>
           </form>
 
@@ -136,7 +189,7 @@ export default function LoginPage() {
               Besoin d'aide technique ?{" "}
               <Link
                 href="#"
-                className="text-green-600 dark:text-green-500 font-bold hover:underline"
+                className="text-green-600 font-bold hover:underline"
               >
                 Contactez le support
               </Link>
