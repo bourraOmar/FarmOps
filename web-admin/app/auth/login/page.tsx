@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-stretch bg-white font-sans overflow-hidden">
+    <div className="min-h-screen flex items-stretch bg-white dark:bg-gray-900 font-sans overflow-hidden">
       {/* CÔTÉ GAUCHE : IMAGE AVEC OVERLAY VERT */}
       <div className="hidden lg:flex w-1/2 relative">
         {/* Overlay Vert (Opacity 60-70% comme sur l'image) */}
@@ -69,18 +69,18 @@ export default function LoginPage() {
       </div>
 
       {/* CÔTÉ DROIT : FORMULAIRE BLANC */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 bg-white dark:bg-gray-900">
         <div className="max-w-md w-full">
           <div className="mb-10 lg:hidden text-center">
             <Clover
               data-lucide="sprout"
               className="text-green-600 w-12 h-12 mx-auto mb-2"
             />
-            <h1 className="text-2xl font-bold text-gray-900">FarmOps Admin</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">FarmOps Admin</h1>
           </div>
 
-          <h3 className="text-3xl font-bold text-gray-900 mb-2">Bienvenue</h3>
-          <p className="text-gray-500 mb-8">
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Bienvenue</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-8">
             Veuillez entrer vos identifiants pour accéder au dashboard.
           </p>
           <form className="space-y-6">
@@ -89,14 +89,13 @@ export default function LoginPage() {
                 Email Administrateur
               </label>
               <div className="relative">
-                <i
-                  data-lucide="mail"
-                  className="w-5 h-5 absolute left-4 top-3.5 text-gray-300"
-                ></i>
+                <Mail
+                  className="w-5 h-5 absolute left-4 top-3.5 text-gray-400 dark:text-gray-500"
+                />
                 <input
                   type="email"
                   placeholder="admin@myfarmops.app"
-                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-900 dark:text-white transition-all"
                 />
               </div>
             </div>
@@ -108,30 +107,27 @@ export default function LoginPage() {
                 </label>
                 <a
                   href="#"
-                  className="text-xs font-bold text-green-600 hover:underline"
+                  className="text-xs font-bold text-green-600 dark:text-green-500 hover:underline"
                 >
                   Oublié ?
                 </a>
               </div>
               <div className="relative">
-                <i
-                  data-lucide="lock"
-                  className="w-5 h-5 absolute left-4 top-3.5 text-gray-300"
-                ></i>
+                <Lock className="w-5 h-5 absolute left-4 top-3.5 text-gray-400 dark:text-gray-500" />
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-900 dark:text-white transition-all"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+              className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-100 dark:shadow-none hover:bg-green-700 transition-all flex items-center justify-center gap-2"
             >
               Se connecter
-              <i data-lucide="log-in" className="w-5 h-5"></i>
+              <LogIn className="w-5 h-5" />
             </button>
           </form>
 
@@ -140,7 +136,7 @@ export default function LoginPage() {
               Besoin d'aide technique ?{" "}
               <Link
                 href="#"
-                className="text-green-600 font-bold hover:underline"
+                className="text-green-600 dark:text-green-500 font-bold hover:underline"
               >
                 Contactez le support
               </Link>
