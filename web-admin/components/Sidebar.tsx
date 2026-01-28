@@ -23,18 +23,18 @@ const Sidebar = () => {
   const navItemClass = (path: string) => `
     flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
     ${isActive(path) 
-      ? 'text-green-700 bg-green-50 font-medium' 
-      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+      ? 'text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-400 font-medium' 
+      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'}
   `;
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 z-50">
+    <aside className="w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed left-0 top-0 z-50">
       {/* LOGO */}
       <div className="p-6 flex items-center gap-3">
         <div className="bg-green-600 p-2 rounded-lg">
           <Sprout className="text-white w-6 h-6" />
         </div>
-        <h1 className="text-xl font-bold text-gray-800 tracking-tight">FarmOps</h1>
+        <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">FarmOps</h1>
       </div>
 
       {/* NAVIGATION */}
@@ -78,14 +78,14 @@ const Sidebar = () => {
       </nav>
 
       {/* FOOTER - ADMIN PROFILE */}
-      <div className="p-4 border-t border-gray-100">
-        <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl">
-          <div className="w-10 h-10 rounded-full bg-green-200 flex items-center justify-center font-bold text-green-700 shrink-0">
+      <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
+          <div className="w-10 h-10 rounded-full bg-green-200 dark:bg-green-900 flex items-center justify-center font-bold text-green-700 dark:text-green-400 shrink-0">
             AD
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-semibold text-gray-800 truncate">Admin FarmOps</p>
-            <p className="text-xs text-gray-500 truncate">admin@myfarmops.app</p>
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">Admin FarmOps</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">admin@myfarmops.app</p>
           </div>
           <button title="Déconnexion" className="text-gray-400 hover:text-red-500 transition-colors">
             <LogOut className="w-5 h-5" />
