@@ -15,12 +15,12 @@ export default function MilkProductionPage() {
       {/* HEADER */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Analyse de la Production Laitière</h2>
-          <p className="text-gray-500 text-sm">Suivi centralisé des records de traite et performances par région.</p>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Analyse de la Production Laitière</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Suivi centralisé des records de traite et performances par région.</p>
         </div>
 
         <div className="flex gap-3">
-          <div className="bg-blue-600 text-white px-5 py-3 rounded-2xl shadow-lg shadow-blue-100 flex items-center gap-4">
+          <div className="bg-blue-600 text-white px-5 py-3 rounded-2xl shadow-lg shadow-blue-100 dark:shadow-none flex items-center gap-4">
             <div className="bg-white/20 p-2 rounded-xl">
               <Droplets className="w-6 h-6 text-white" />
             </div>
@@ -35,23 +35,23 @@ export default function MilkProductionPage() {
       {/* ANALYTICS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         {/* Graphique des tendances */}
-        <section className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <section className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
           <div className="flex justify-between items-center mb-8">
-            <h3 className="font-bold text-gray-800 flex items-center gap-2">
+            <h3 className="font-bold text-gray-800 dark:text-white flex items-center gap-2">
               <BarChart className="w-5 h-5 text-blue-500" />
               Tendances Mensuelles
             </h3>
-            <div className="flex bg-gray-50 p-1 rounded-xl">
-              <button className="px-4 py-1.5 text-xs font-bold bg-white text-blue-600 shadow-sm rounded-lg transition-all">
+            <div className="flex bg-gray-50 dark:bg-gray-800 p-1 rounded-xl">
+              <button className="px-4 py-1.5 text-xs font-bold bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm rounded-lg transition-all">
                 Lait
               </button>
-              <button className="px-4 py-1.5 text-xs font-bold text-gray-400 hover:text-gray-600 transition-all">
+              <button className="px-4 py-1.5 text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all">
                 Revenus
               </button>
             </div>
           </div>
           
-          <div className="h-64 bg-linear-to-t from-blue-50/30 to-transparent rounded-2xl border-b-2 border-blue-100 flex items-end justify-around px-6 pb-4">
+          <div className="h-64 bg-linear-to-t from-blue-50/30 dark:from-blue-900/10 to-transparent rounded-2xl border-b-2 border-blue-100 dark:border-blue-900 flex items-end justify-around px-6 pb-4">
             {/* Barres simulées */}
             {[40, 55, 45, 75, 65, 90, 85].map((height, i) => (
               <div 
@@ -59,7 +59,7 @@ export default function MilkProductionPage() {
                 className="w-10 bg-blue-500 rounded-t-lg transition-all hover:bg-blue-600 cursor-pointer relative group" 
                 style={{ height: `${height}%` }}
               >
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 dark:bg-white text-white dark:text-gray-900 text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                   {height * 100} L
                 </div>
               </div>
@@ -72,8 +72,8 @@ export default function MilkProductionPage() {
         </section>
 
         {/* Top Régions */}
-        <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <h3 className="font-bold text-gray-800 mb-8 flex items-center gap-2">
+        <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <h3 className="font-bold text-gray-800 dark:text-white mb-8 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-green-500" />
             Top Régions
           </h3>
@@ -85,10 +85,10 @@ export default function MilkProductionPage() {
             ].map((region, i) => (
               <div key={i}>
                 <div className="flex justify-between items-end text-sm mb-3">
-                  <span className="font-bold text-gray-700">{region.name}</span>
-                  <span className="font-black text-blue-600">{region.volume} L</span>
+                  <span className="font-bold text-gray-700 dark:text-gray-300">{region.name}</span>
+                  <span className="font-black text-blue-600 dark:text-blue-400">{region.volume} L</span>
                 </div>
-                <div className="w-full bg-gray-50 h-3 rounded-full overflow-hidden border border-gray-100">
+                <div className="w-full bg-gray-50 dark:bg-gray-800 h-3 rounded-full overflow-hidden border border-gray-100 dark:border-gray-700">
                   <div 
                     className={`${region.color} h-full rounded-full transition-all duration-1000`} 
                     style={{ width: `${region.percent}%` }}

@@ -37,20 +37,20 @@ export default function FarmerProfilePage({ params }: { params: { id: string } }
               OB
             </div>
             <div>
-              <h2 className="text-3xl font-extrabold text-gray-800">Omar Bourra</h2>
-              <p className="text-gray-500 flex items-center gap-2 mt-1">
+              <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100">Omar Bourra</h2>
+              <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
                 Membre depuis le 12 Décembre 2025 •
-                <span className="text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-md text-xs">Compte Actif</span>
+                <span className="text-green-600 dark:text-green-400 font-semibold bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-md text-xs">Compte Actif</span>
               </p>
             </div>
           </div>
           
           <div className="flex gap-3">
-            <button className="bg-white border border-gray-200 text-orange-600 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-50 transition-colors flex items-center gap-2 shadow-sm">
+            <button className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-orange-600 dark:text-orange-400 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors flex items-center gap-2 shadow-sm">
               <Slash className="w-4 h-4" />
               Suspendre
             </button>
-            <button className="bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2">
+            <button className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
               Supprimer
             </button>
@@ -63,38 +63,38 @@ export default function FarmerProfilePage({ params }: { params: { id: string } }
         {/* COLONNE GAUCHE : INFOS & STAFF */}
         <div className="space-y-6">
           {/* Section: Infos Personnelles */}
-          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+            <h3 className="font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
               <User className="w-5 h-5 text-green-600" />
               Informations Personnelles
             </h3>
             <div className="space-y-5">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-50 rounded-lg"><Mail className="w-4 h-4 text-gray-400"/></div>
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><Mail className="w-4 h-4 text-gray-400"/></div>
                 <div>
                   <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Email</p>
-                  <p className="text-sm text-gray-700 font-medium">omar.bourra@myfarmops.app</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">omar.bourra@myfarmops.app</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-50 rounded-lg"><Phone className="w-4 h-4 text-gray-400"/></div>
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><Phone className="w-4 h-4 text-gray-400"/></div>
                 <div>
                   <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Téléphone</p>
-                  <p className="text-sm text-gray-700 font-medium">+212 600 000 000</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">+212 600 000 000</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-50 rounded-lg"><Fingerprint className="w-4 h-4 text-gray-400"/></div>
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><Fingerprint className="w-4 h-4 text-gray-400"/></div>
                 <div>
                   <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">CIN</p>
-                  <p className="text-sm text-gray-700 font-mono font-bold">HH123456</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-mono font-bold">HH123456</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-50 rounded-lg"><MapPin className="w-4 h-4 text-gray-400"/></div>
+                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><MapPin className="w-4 h-4 text-gray-400"/></div>
                 <div>
                   <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Localisation</p>
-                  <p className="text-sm text-gray-700 font-medium">Safi, Maroc</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">Safi, Maroc</p>
                 </div>
               </div>
             </div>
