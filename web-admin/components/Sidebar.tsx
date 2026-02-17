@@ -1,31 +1,61 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { 
-  Sprout, 
-  LayoutDashboard, 
-  Users, 
-  Beef, 
-  Droplets, 
-  Warehouse, 
-  Settings, 
-  LogOut 
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  Sprout,
+  LayoutDashboard,
+  Users,
+  Beef,
+  Droplets,
+  Warehouse,
+  Settings,
+  LogOut
 } from 'lucide-react';
+import { apiClient, User } from '@/lib/api';
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Load user from localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        setUser(JSON.parse(userStr));
+      } catch (error) {
+        console.error('Failed to parse user data:', error);
+      }
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    await apiClient.logout();
+    router.push('/auth/login');
+  };
 
   // Fonction pour vérifier si le lien est actif
   const isActive = (path: string) => pathname === path;
 
   const navItemClass = (path: string) => `
     flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
-    ${isActive(path) 
-      ? 'text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-400 font-medium' 
+    ${isActive(path)
+      ? 'text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-400 font-medium'
       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'}
   `;
+
+  // Get user initials
+  const getUserInitials = () => {
+    if (!user || !user.fullName) return 'AD';
+    const names = user.fullName.split(' ');
+    if (names.length >= 2 && names[0] && names[1]) {
+      return (names[0][0] + names[1][0]).toUpperCase();
+    }
+    return user.fullName.substring(0, 2).toUpperCase();
+  };
 
   return (
     <aside className="w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed left-0 top-0 z-50">
@@ -39,9 +69,9 @@ const Sidebar = () => {
 
       {/* NAVIGATION */}
       <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
-        
+
         <p className="text-xs font-semibold text-gray-400 uppercase px-3 mb-2">Principal</p>
-        
+
         <Link href="/dashboard" className={navItemClass('/dashboard')}>
           <LayoutDashboard className="w-5 h-5" />
           Dashboard
@@ -81,13 +111,21 @@ const Sidebar = () => {
       <div className="p-4 border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
           <div className="w-10 h-10 rounded-full bg-green-200 dark:bg-green-900 flex items-center justify-center font-bold text-green-700 dark:text-green-400 shrink-0">
-            AD
+            {getUserInitials()}
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">Admin FarmOps</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">admin@myfarmops.app</p>
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+              {user?.fullName || 'Admin FarmOps'}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {user?.email || 'admin@myfarmops.app'}
+            </p>
           </div>
-          <button title="Déconnexion" className="text-gray-400 hover:text-red-500 transition-colors">
+          <button
+            onClick={handleLogout}
+            title="Déconnexion"
+            className="text-gray-400 hover:text-red-500 transition-colors"
+          >
             <LogOut className="w-5 h-5" />
           </button>
         </div>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Mail, Lock, LogIn, Clover, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { apiClient } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,18 +18,35 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    // Simulation d'authentification (À connecter avec le backend NestJS plus tard)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Fake network delay
+      // Call the real backend API
+      const response = await apiClient.login(email, password);
 
-      if (email === "admin@myfarmops.app" && password === "password") {
-        console.log("Login success");
-        router.push("/dashboard");
-      } else {
-        setError("Identifiants incorrects. Essayez admin@myfarmops.app / password");
+      // Store the access token
+      localStorage.setItem("access_token", response.access_token);
+
+      // Fetch user profile to verify admin role
+      const profile = await apiClient.getProfile();
+
+      // Check if user is admin
+      if (profile.role !== "admin") {
+        setError("Accès refusé. Seuls les administrateurs peuvent se connecter.");
+        localStorage.removeItem("access_token");
+        return;
       }
+
+      // Store user data
+      localStorage.setItem("user", JSON.stringify(profile));
+
+      console.log("Login success:", profile);
+      router.push("/dashboard");
     } catch (err) {
-      setError("Une erreur est survenue lors de la connexion.");
+      console.error("Login error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Identifiants incorrects ou erreur de connexion au serveur."
+      );
     } finally {
       setLoading(false);
     }
@@ -118,7 +136,7 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            
+
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
                 Email Administrateur
