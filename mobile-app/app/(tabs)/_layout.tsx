@@ -1,34 +1,29 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Sprout, PawPrint, Users, User } from 'lucide-react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+    <Tabs screenOptions={{
+      headerShown: false,
+      tabBarStyle: { backgroundColor: '#102815', borderTopColor: '#1D3B24' },
+      tabBarActiveTintColor: '#00E632',
+      tabBarInactiveTintColor: '#8BA890'
+    }}>
       <Tabs.Screen
         name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+        options={{ title: 'Home', tabBarIcon: ({ color }) => <Sprout color={color} size={24} /> }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
+        name="herd"
+        options={{ title: 'Herd', tabBarIcon: ({ color }) => <PawPrint color={color} size={24} /> }}
+      />
+      <Tabs.Screen
+        name="workers"
+        options={{ title: 'Workers', tabBarIcon: ({ color }) => <Users color={color} size={24} /> }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: 'Profile', tabBarIcon: ({ color }) => <User color={color} size={24} /> }}
       />
     </Tabs>
   );
