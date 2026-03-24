@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { WorkersService } from './workers.service';
 import { CreateWorkerDto } from './dto/create-worker.dto';
@@ -15,8 +15,8 @@ export class WorkersController {
   }
 
   @Get()
-  async findAll(@Request() req: any): Promise<Worker[]> {
-    return this.workersService.findAll(req.user._id);
+  async findAll(@Request() req: any, @Query('farmId') farmId?: string): Promise<Worker[]> {
+    return this.workersService.findAll(req.user._id, farmId);
   }
 
   @Get(':id')

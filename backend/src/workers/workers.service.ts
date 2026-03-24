@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Worker, WorkerDocument } from './schemas/worker.schema';
 import { CreateWorkerDto } from './dto/create-worker.dto';
 
@@ -11,11 +11,19 @@ export class WorkersService {
   ) {}
 
   async create(userId: string, dto: CreateWorkerDto): Promise<Worker> {
-    return new this.workerModel({ ...dto, userId }).save();
+    return new this.workerModel({
+      ...dto,
+      userId,
+      farmId: new Types.ObjectId(dto.farmId),
+    }).save();
   }
 
-  async findAll(userId: string): Promise<Worker[]> {
-    return this.workerModel.find({ userId }).exec();
+  async findAll(userId: string, farmId?: string): Promise<Worker[]> {
+    const filter: any = { userId };
+    if (farmId) {
+      filter.farmId = new Types.ObjectId(farmId);
+    }
+    return this.workerModel.find(filter).exec();
   }
 
   async findOne(id: string, userId: string): Promise<Worker | null> {
@@ -28,5 +36,17 @@ export class WorkersService {
 
   async remove(id: string, userId: string): Promise<void> {
     await this.workerModel.findOneAndDelete({ _id: id, userId }).exec();
+  }
+
+  async countAll(userId: string, farmId?: string): Promise<number> {
+    const filter: any = { userId };
+    if (farmId) {
+      filter.farmId = new Types.ObjectId(farmId);
+    }
+    return this.workerModel.countDocuments(filter).exec();
+  }
+
+  async removeAllByFarm(farmId: string, userId: string): Promise<void> {
+    await this.workerModel.deleteMany({ farmId: new Types.ObjectId(farmId), userId }).exec();
   }
 }
