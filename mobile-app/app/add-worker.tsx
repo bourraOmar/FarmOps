@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { apiClient } from '../lib/api';
+import { useFarm } from '../contexts/FarmContext';
 
 const ROLES = [
   'Head Herdsman',
@@ -29,6 +30,7 @@ const ROLES = [
 
 export default function AddWorkerScreen() {
   const router = useRouter();
+  const { selectedFarm } = useFarm();
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [phone, setPhone] = useState('');
@@ -45,10 +47,15 @@ export default function AddWorkerScreen() {
       Alert.alert('Missing Info', 'Please select a role.');
       return;
     }
+    if (!selectedFarm) {
+      Alert.alert('No Farm Selected', 'Please select or create a farm first.');
+      return;
+    }
 
     setLoading(true);
     try {
       await apiClient.createWorker({
+        farmId: selectedFarm._id,
         name: name.trim(),
         role,
         phone: phone.trim() || undefined,
