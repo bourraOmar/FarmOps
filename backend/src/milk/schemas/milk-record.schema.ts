@@ -8,6 +8,9 @@ export class MilkRecord {
   @Prop({ required: true, index: true })
   userId: string;
 
+  @Prop({ type: Types.ObjectId, ref: 'Farm', required: true, index: true })
+  farmId: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'Animal', required: true })
   animalId: Types.ObjectId;
 
