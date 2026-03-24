@@ -5,6 +5,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -26,13 +27,13 @@ export class MilkController {
   }
 
   @Get()
-  async findAll(@Request() req: any): Promise<MilkRecord[]> {
-    return this.milkService.findAll(req.user._id);
+  async findAll(@Request() req: any, @Query('farmId') farmId?: string): Promise<MilkRecord[]> {
+    return this.milkService.findAll(req.user._id, farmId);
   }
 
   @Get('stats')
-  async getStats(@Request() req: any) {
-    return this.milkService.getStats(req.user._id);
+  async getStats(@Request() req: any, @Query('farmId') farmId?: string) {
+    return this.milkService.getStats(req.user._id, farmId);
   }
 
   @Get('animal/:animalId')
