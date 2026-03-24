@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Sprout, PawPrint, Users, User } from 'lucide-react-native';
+import { Sprout, Warehouse, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -14,17 +14,16 @@ export default function TabLayout() {
         options={{ title: 'Home', tabBarIcon: ({ color }) => <Sprout color={color} size={24} /> }}
       />
       <Tabs.Screen
-        name="herd"
-        options={{ title: 'Herd', tabBarIcon: ({ color }) => <PawPrint color={color} size={24} /> }}
-      />
-      <Tabs.Screen
-        name="workers"
-        options={{ title: 'Workers', tabBarIcon: ({ color }) => <Users color={color} size={24} /> }}
+        name="farms"
+        options={{ title: 'Farms', tabBarIcon: ({ color }) => <Warehouse color={color} size={24} /> }}
       />
       <Tabs.Screen
         name="profile"
         options={{ title: 'Profile', tabBarIcon: ({ color }) => <User color={color} size={24} /> }}
       />
+      {/* Hide herd and workers from main tabs — they live inside farm detail now */}
+      <Tabs.Screen name="herd" options={{ href: null }} />
+      <Tabs.Screen name="workers" options={{ href: null }} />
     </Tabs>
   );
 }
