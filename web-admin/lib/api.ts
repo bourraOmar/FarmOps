@@ -43,8 +43,10 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Login failed' }));
-      throw new Error(error.message || 'Invalid credentials');
+      const errorBody = await response.json().catch(() => ({}));
+      // NestJS returns { statusCode, message, error } — use message for the descriptive text
+      const message = errorBody.message || errorBody.error || 'Email ou mot de passe incorrect';
+      throw new Error(message);
     }
 
     return response.json();
