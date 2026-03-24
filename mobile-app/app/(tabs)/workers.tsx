@@ -15,6 +15,8 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '../../lib/api';
+import { useFarm } from '../../contexts/FarmContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 type Worker = {
   _id: string;
@@ -27,6 +29,8 @@ type Worker = {
 
 export default function WorkersScreen() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { selectedFarm } = useFarm();
   const [search, setSearch] = useState('');
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +38,7 @@ export default function WorkersScreen() {
 
   const fetchWorkers = async () => {
     try {
-      const data = await apiClient.getWorkers();
+      const data = await apiClient.getWorkers(selectedFarm?._id);
       setWorkers(data);
     } catch {
       Alert.alert('Error', 'Could not load workers.');
@@ -46,9 +50,13 @@ export default function WorkersScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       fetchWorkers();
-    }, [])
+    }, [selectedFarm?._id, isAuthenticated])
   );
 
   const filtered = workers.filter(
