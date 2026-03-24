@@ -12,7 +12,28 @@ export interface User {
   phone: string;
 }
 
+export interface Farm {
+  _id: string;
+  userId: string;
+  name: string;
+  location?: string;
+  size?: number;
+  description?: string;
+  photoUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateFarmPayload {
+  name: string;
+  location?: string;
+  size?: number;
+  description?: string;
+  photoUrl?: string;
+}
+
 export interface CreateAnimalPayload {
+  farmId: string;
   name: string;
   tagId?: string;
   breed?: string;
@@ -45,6 +66,8 @@ class ApiClient {
     );
   }
 
+  // ───────── Auth ─────────
+
   async login(email: string, password: string) {
     const res = await this.client.post('/auth/login', { email, password });
     return res.data; // { access_token, user }
@@ -60,13 +83,47 @@ class ApiClient {
     return res.data;
   }
 
+  // ───────── Farms ─────────
+
+  async getFarms(): Promise<Farm[]> {
+    const res = await this.client.get<Farm[]>('/farms');
+    return res.data;
+  }
+
+  async getFarmById(id: string): Promise<Farm> {
+    const res = await this.client.get<Farm>(`/farms/${id}`);
+    return res.data;
+  }
+
+  async createFarm(data: CreateFarmPayload): Promise<Farm> {
+    const res = await this.client.post<Farm>('/farms', data);
+    return res.data;
+  }
+
+  async updateFarm(id: string, data: Partial<CreateFarmPayload>): Promise<Farm> {
+    const res = await this.client.patch<Farm>(`/farms/${id}`, data);
+    return res.data;
+  }
+
+  async deleteFarm(id: string): Promise<void> {
+    await this.client.delete(`/farms/${id}`);
+  }
+
+  async getFarmStats(): Promise<{ totalFarms: number }> {
+    const res = await this.client.get<{ totalFarms: number }>('/farms/stats');
+    return res.data;
+  }
+
+  // ───────── Livestock (Farm-scoped) ─────────
+
   async createAnimal(data: CreateAnimalPayload) {
     const res = await this.client.post('/livestock', data);
     return res.data;
   }
 
-  async getAnimals() {
-    const res = await this.client.get('/livestock');
+  async getAnimals(farmId?: string) {
+    const params = farmId ? { farmId } : {};
+    const res = await this.client.get('/livestock', { params });
     return res.data;
   }
 
@@ -84,22 +141,27 @@ class ApiClient {
     await this.client.delete(`/livestock/${id}`);
   }
 
-  async getDashboardStats() {
-    const res = await this.client.get<{ totalAnimals: number }>('/livestock/stats');
+  async getDashboardStats(farmId?: string) {
+    const params = farmId ? { farmId } : {};
+    const res = await this.client.get<{ totalAnimals: number }>('/livestock/stats', { params });
     return res.data;
   }
 
-  async getNextTagId(): Promise<string> {
-    const res = await this.client.get<{ tagId: string }>('/livestock/next-tag-id');
+  async getNextTagId(farmId?: string): Promise<string> {
+    const params = farmId ? { farmId } : {};
+    const res = await this.client.get<{ tagId: string }>('/livestock/next-tag-id', { params });
     return res.data.tagId;
   }
 
-  async getWorkers() {
-    const res = await this.client.get('/workers');
+  // ───────── Workers (Farm-scoped) ─────────
+
+  async getWorkers(farmId?: string) {
+    const params = farmId ? { farmId } : {};
+    const res = await this.client.get('/workers', { params });
     return res.data;
   }
 
-  async createWorker(data: { name: string; role: string; phone?: string; email?: string; avatarUrl?: string }) {
+  async createWorker(data: { farmId: string; name: string; role: string; phone?: string; email?: string; avatarUrl?: string }) {
     const res = await this.client.post('/workers', data);
     return res.data;
   }
@@ -118,8 +180,11 @@ class ApiClient {
     await this.client.delete(`/workers/${id}`);
   }
 
-  async getMilkRecords() {
-    const res = await this.client.get('/milk');
+  // ───────── Milk Records (Farm-scoped) ─────────
+
+  async getMilkRecords(farmId?: string) {
+    const params = farmId ? { farmId } : {};
+    const res = await this.client.get('/milk', { params });
     return res.data;
   }
 
@@ -128,12 +193,13 @@ class ApiClient {
     return res.data;
   }
 
-  async getMilkStats() {
-    const res = await this.client.get<{ totalToday: number; totalThisMonth: number; recordCount: number }>('/milk/stats');
+  async getMilkStats(farmId?: string) {
+    const params = farmId ? { farmId } : {};
+    const res = await this.client.get<{ totalToday: number; totalThisMonth: number; recordCount: number }>('/milk/stats', { params });
     return res.data;
   }
 
-  async createMilkRecord(data: { animalId: string; date: string; amountLiters: number; session: string; notes?: string }) {
+  async createMilkRecord(data: { farmId: string; animalId: string; date: string; amountLiters: number; session: string; notes?: string }) {
     const res = await this.client.post('/milk', data);
     return res.data;
   }
@@ -142,9 +208,12 @@ class ApiClient {
     await this.client.delete(`/milk/${id}`);
   }
 
+  // ───────── Auth Utils ─────────
+
   async logout(): Promise<void> {
     await AsyncStorage.removeItem('access_token');
     await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('selected_farm_id');
   }
 }
 
