@@ -22,6 +22,8 @@ import {
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiClient } from '../../lib/api';
+import { useFarm } from '../../contexts/FarmContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +31,8 @@ const filters = ['All', 'Bulls', 'Cows', 'Calves', 'Sick'];
 
 export default function HerdScreen() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { selectedFarm } = useFarm();
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchText, setSearchText] = useState('');
   const [animals, setAnimals] = useState<any[]>([]);
@@ -37,7 +41,7 @@ export default function HerdScreen() {
 
   const fetchAnimals = async () => {
     try {
-      const data = await apiClient.getAnimals();
+      const data = await apiClient.getAnimals(selectedFarm?._id);
       setAnimals(data);
     } catch (error) {
       console.error('Failed to fetch animals:', error);
@@ -48,16 +52,21 @@ export default function HerdScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       fetchAnimals();
-    }, [])
+    }, [selectedFarm?._id, isAuthenticated])
   );
 
   const onRefresh = useCallback(async () => {
+    if (!isAuthenticated) return;
     setRefreshing(true);
     await fetchAnimals();
     setRefreshing(false);
-  }, []);
+  }, [isAuthenticated]);
 
   const getCategory = (animal: any) => {
     if (animal.gender === 'Male') return 'Bull';
