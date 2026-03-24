@@ -12,6 +12,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '../lib/api';
+import { useFarm } from '../contexts/FarmContext';
 
 type MilkRecord = {
   _id: string;
@@ -37,6 +38,7 @@ const SESSION_COLORS: Record<string, string> = {
 
 export default function MilkProductionScreen() {
   const router = useRouter();
+  const { selectedFarm } = useFarm();
   const [records, setRecords] = useState<MilkRecord[]>([]);
   const [stats, setStats] = useState({ totalToday: 0, totalThisMonth: 0, recordCount: 0 });
   const [loading, setLoading] = useState(true);
@@ -45,8 +47,8 @@ export default function MilkProductionScreen() {
   const fetchData = async () => {
     try {
       const [recs, st] = await Promise.all([
-        apiClient.getMilkRecords(),
-        apiClient.getMilkStats(),
+        apiClient.getMilkRecords(selectedFarm?._id),
+        apiClient.getMilkStats(selectedFarm?._id),
       ]);
       setRecords(recs);
       setStats(st);
@@ -62,7 +64,7 @@ export default function MilkProductionScreen() {
     useCallback(() => {
       setLoading(true);
       fetchData();
-    }, [])
+    }, [selectedFarm?._id])
   );
 
   const handleDelete = (record: MilkRecord) => {
