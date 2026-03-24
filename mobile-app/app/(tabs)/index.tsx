@@ -1,212 +1,280 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { apiClient } from '../../lib/api';
-import { 
-  Bell, 
-  CloudSun, 
-  PawPrint, 
-  Droplet, 
-  Triangle, 
-  Plus, 
-  ScanLine, 
-  Syringe, 
-  CheckCircle, 
-  ChevronRight 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import {
+  PawPrint,
+  Users,
+  Droplets,
+  Warehouse,
+  ChevronRight,
+  TrendingUp,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { apiClient } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
+import { useFarm } from '../../contexts/FarmContext';
 
-export default function Dashboard() {
-  const { user } = useAuth();
+export default function HomeScreen() {
   const router = useRouter();
-  const [stats, setStats] = useState({ totalAnimals: 0 });
-  const [milkStats, setMilkStats] = useState({ totalToday: 0, totalThisMonth: 0, recordCount: 0 });
+  const { user, isAuthenticated } = useAuth();
+  const { farms } = useFarm();
+  const [globalStats, setGlobalStats] = useState({
+    totalAnimals: 0,
+    totalWorkers: 0,
+    totalMilkToday: 0,
+    totalMilkMonth: 0,
+  });
+  const [farmStats, setFarmStats] = useState<
+    { farmId: string; name: string; animals: number; workers: number; milkToday: number }[]
+  >([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchStats = async () => {
+  const loadAllStats = async () => {
     try {
-      const [data, milk] = await Promise.all([
+      // Get global stats (no farmId = all farms)
+      const [livestockAll, milkAll, workersAll] = await Promise.all([
         apiClient.getDashboardStats(),
         apiClient.getMilkStats(),
+        apiClient.getWorkers(),
       ]);
-      setStats(data);
-      setMilkStats(milk);
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
+
+      setGlobalStats({
+        totalAnimals: livestockAll.totalAnimals,
+        totalWorkers: Array.isArray(workersAll) ? workersAll.length : 0,
+        totalMilkToday: milkAll.totalToday,
+        totalMilkMonth: milkAll.totalThisMonth,
+      });
+
+      // Get per-farm stats
+      const perFarm = await Promise.all(
+        farms.map(async (farm) => {
+          try {
+            const [ls, ms, ws] = await Promise.all([
+              apiClient.getDashboardStats(farm._id),
+              apiClient.getMilkStats(farm._id),
+              apiClient.getWorkers(farm._id),
+            ]);
+            return {
+              farmId: farm._id,
+              name: farm.name,
+              animals: ls.totalAnimals,
+              workers: Array.isArray(ws) ? ws.length : 0,
+              milkToday: ms.totalToday,
+            };
+          } catch {
+            return { farmId: farm._id, name: farm.name, animals: 0, workers: 0, milkToday: 0 };
+          }
+        })
+      );
+      setFarmStats(perFarm);
+    } catch (e) {
+      console.error('Failed to load global stats:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
-      fetchStats();
-    }, [])
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      loadAllStats();
+    }, [farms.length, isAuthenticated])
   );
 
   const onRefresh = useCallback(async () => {
+    if (!isAuthenticated) return;
     setRefreshing(true);
-    await fetchStats();
+    await loadAllStats();
     setRefreshing(false);
-  }, []);
+  }, [farms.length, isAuthenticated]);
 
-  const firstName = user?.fullName?.split(' ')[0] || 'User';
+  const firstName = user?.fullName?.split(' ')[0] || 'Farmer';
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#00E632" />
         }
       >
-        
-        {/* Header Section */}
+        {/* Header */}
         <View style={styles.header}>
           <View>
-            <View style={styles.greetingRowContainer}>
-                <Text style={styles.greetingTitle}>Good Morning,</Text>
-            </View>
-            <Text style={styles.greetingName}>{firstName}</Text>
-          </View>
-          
-          <View style={styles.headerRight}>
-             {/* Weather Widget */}
-             <View style={styles.weatherWidget}>
-                <CloudSun size={24} color="#FDB813" />
-                <Text style={styles.weatherTemp}>18°C</Text>
-             </View>
-             
+            <Text style={styles.greeting}>Hello, {firstName} 👋</Text>
+            <Text style={styles.subtitle}>Overview of all your farms</Text>
           </View>
         </View>
 
-        {/* Stats Cards Horizontal Scroll */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsScroll} contentContainerStyle={styles.statsScrollContent}>
-          
-          {/* Card 1: Cattle */}
-          <LinearGradient
-            colors={['#102815', '#163320']}
-            style={styles.statCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={styles.cardTop}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(91, 154, 250, 0.2)' }]}>
-                <PawPrint size={20} color="#5B9AFA" />
+        {loading ? (
+          <ActivityIndicator size="large" color="#00E632" style={{ marginTop: 60 }} />
+        ) : (
+          <>
+            {/* Global Stats Grid */}
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <LinearGradient
+                  colors={['#102815', '#0D1F12']}
+                  style={styles.statGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={[styles.statIcon, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
+                    <Warehouse size={24} color="#F59E0B" />
+                  </View>
+                  <Text style={styles.statNumber}>{farms.length}</Text>
+                  <Text style={styles.statLabel}>Total Farms</Text>
+                </LinearGradient>
               </View>
-              <Text style={styles.cardLabel}>Total Cattle</Text>
+
+              <View style={styles.statCard}>
+                <LinearGradient
+                  colors={['#102815', '#0D1F12']}
+                  style={styles.statGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={[styles.statIcon, { backgroundColor: 'rgba(0, 230, 50, 0.12)' }]}>
+                    <PawPrint size={24} color="#00E632" />
+                  </View>
+                  <Text style={styles.statNumber}>{globalStats.totalAnimals}</Text>
+                  <Text style={styles.statLabel}>Total Animals</Text>
+                </LinearGradient>
+              </View>
+
+              <View style={styles.statCard}>
+                <LinearGradient
+                  colors={['#102815', '#0D1F12']}
+                  style={styles.statGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={[styles.statIcon, { backgroundColor: 'rgba(99, 102, 241, 0.12)' }]}>
+                    <Users size={24} color="#6366F1" />
+                  </View>
+                  <Text style={styles.statNumber}>{globalStats.totalWorkers}</Text>
+                  <Text style={styles.statLabel}>Total Workers</Text>
+                </LinearGradient>
+              </View>
+
+              <View style={styles.statCard}>
+                <LinearGradient
+                  colors={['#102815', '#0D1F12']}
+                  style={styles.statGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={[styles.statIcon, { backgroundColor: 'rgba(59, 130, 246, 0.12)' }]}>
+                    <Droplets size={24} color="#3B82F6" />
+                  </View>
+                  <Text style={styles.statNumber}>{globalStats.totalMilkToday.toFixed(1)}L</Text>
+                  <Text style={styles.statLabel}>Milk Today</Text>
+                </LinearGradient>
+              </View>
             </View>
-            
-            <View>
-               <Text style={styles.cardValue}>{stats?.totalAnimals || 0}</Text>
-               <View style={styles.trendRow}>
-                  <Text style={styles.trendIcon}>↗</Text>
-                  <Text style={styles.trendText}>+2 born</Text>
-               </View>
+
+            {/* Monthly Summary */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Monthly Summary</Text>
+              <LinearGradient
+                colors={['#0D2E14', '#0A2410']}
+                style={styles.summaryCard}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.summaryRow}>
+                  <View style={styles.summaryLeft}>
+                    <TrendingUp size={18} color="#00E632" />
+                    <Text style={styles.summaryLabel}>Total Milk This Month</Text>
+                  </View>
+                  <Text style={styles.summaryValue}>{globalStats.totalMilkMonth.toFixed(1)} L</Text>
+                </View>
+              </LinearGradient>
             </View>
-          </LinearGradient>
 
-          {/* Card 2: Milk Yield */}
-          <LinearGradient
-            colors={['#102815', '#163320']}
-            style={styles.statCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-             <View style={styles.cardTop}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(0, 230, 50, 0.2)' }]}>
-                <Droplet size={20} color="#00E632" />
+            {/* Per-Farm Breakdown */}
+            {farmStats.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Farm Breakdown</Text>
+                {farmStats.map((fs) => (
+                  <TouchableOpacity
+                    key={fs.farmId}
+                    style={styles.farmBreakdownCard}
+                    onPress={() => router.push(`/farm/${fs.farmId}`)}
+                  >
+                    <LinearGradient
+                      colors={['#102815', '#0D1F12']}
+                      style={styles.farmBreakdownGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <View style={styles.farmBreakdownHeader}>
+                        <View style={styles.farmBreakdownIcon}>
+                          <Warehouse size={20} color="#00E632" />
+                        </View>
+                        <Text style={styles.farmBreakdownName}>{fs.name}</Text>
+                        <ChevronRight size={18} color="#8BA890" />
+                      </View>
+                      <View style={styles.farmBreakdownStats}>
+                        <View style={styles.farmBreakdownStat}>
+                          <Text style={styles.fbStatNum}>{fs.animals}</Text>
+                          <Text style={styles.fbStatLabel}>Animals</Text>
+                        </View>
+                        <View style={styles.fbDivider} />
+                        <View style={styles.farmBreakdownStat}>
+                          <Text style={styles.fbStatNum}>{fs.workers}</Text>
+                          <Text style={styles.fbStatLabel}>Workers</Text>
+                        </View>
+                        <View style={styles.fbDivider} />
+                        <View style={styles.farmBreakdownStat}>
+                          <Text style={styles.fbStatNum}>{fs.milkToday.toFixed(1)}L</Text>
+                          <Text style={styles.fbStatLabel}>Milk Today</Text>
+                        </View>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
               </View>
-              <Text style={styles.cardLabel}>Morning Yield</Text>
-            </View>
-            
-            <View>
-              <Text style={styles.cardValue}>{milkStats.totalToday.toFixed(1)}L</Text>
-              <View style={styles.progressBarContainer}>
-                 <View style={[styles.progressBarFill, { width: '90%' }]} />
-              </View>
-              <Text style={styles.progressText}>90% of target</Text>
-            </View>
-          </LinearGradient>
+            )}
 
-          {/* Card 3: Alert (Partial) */}
-          <LinearGradient
-            colors={['#2A1515', '#3A1515']}
-            style={[styles.statCard, { marginRight: 24, borderColor: '#3A1515' }]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-             <View style={styles.cardTop}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
-                <Triangle size={20} color="#EF4444" />
-              </View>
-              <Text style={styles.cardLabel}>Alerts</Text>
-            </View>
-            <View>
-               <Text style={styles.cardValue}>3</Text>
-               <Text style={[styles.trendText, {  color: '#EF4444' }]}>2 High Priority</Text>
-            </View>
-          </LinearGradient>
+            {/* No Farms CTA */}
+            {farms.length === 0 && (
+              <TouchableOpacity style={styles.noFarmBanner} onPress={() => router.push('/create-farm')}>
+                <LinearGradient
+                  colors={['#0D2E14', '#0A2410']}
+                  style={styles.noFarmGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Warehouse size={32} color="#00E632" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.noFarmTitle}>Create Your First Farm</Text>
+                    <Text style={styles.noFarmSubtitle}>
+                      Get started by creating a farm to manage your livestock
+                    </Text>
+                  </View>
+                  <ChevronRight size={24} color="#8BA890" />
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+          </>
+        )}
 
-        </ScrollView>
-
-        {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionRow}>
-           <TouchableOpacity style={[styles.actionButton, styles.primaryBtn]} onPress={() => router.push('/add-animal')}>
-              <View style={styles.btnIconCircleBlack}>
-                 <Plus size={28} color="#000" />
-              </View>
-              <Text style={styles.primaryBtnText}>Add Record</Text>
-           </TouchableOpacity>
-
-           <TouchableOpacity style={[styles.actionButton, styles.secondaryBtn]} onPress={() => router.push('/milk-production')}>
-              <View style={[styles.btnIconCircleGreen, { backgroundColor: 'rgba(0, 230, 50, 0.1)' }]}>
-                 <Droplet size={28} color="#00E632" />
-              </View>
-              <Text style={styles.secondaryBtnText}>Milk Log</Text>
-           </TouchableOpacity>
-        </View>
-
-        {/* Recent Activity */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <TouchableOpacity>
-             <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.activityList}>
-           
-           {/* Activity Item 1 */}
-           <View style={styles.activityItem}>
-              <View style={[styles.activityIconBox, { backgroundColor: '#2A1F3D' }]}>
-                 <Syringe size={20} color="#A78BFA" />
-              </View>
-              <View style={styles.activityContent}>
-                 <Text style={styles.activityTitle}>Vet Visit Scheduled</Text>
-                 <Text style={styles.activitySubtitle}>Dr. Smith • General Checkup</Text>
-              </View>
-              <Text style={styles.activityTime}>1h ago</Text>
-           </View>
-
-           {/* Activity Item 2 */}
-            <View style={styles.activityItem}>
-              <View style={[styles.activityIconBox, { backgroundColor: 'rgba(0, 230, 50, 0.1)' }]}>
-                 <CheckCircle size={20} color="#00E632" />
-              </View>
-              <View style={styles.activityContent}>
-                 <Text style={styles.activityTitle}>Milking Batch A</Text>
-                 <Text style={styles.activitySubtitle}>Completed • 250L Collected</Text>
-              </View>
-              <Text style={styles.activityTime}>20m ago</Text>
-           </View>
-           
-        </View>
-        
-        {/* Extra space at bottom for tab bar */}
         <View style={{ height: 100 }} />
-
       </ScrollView>
     </View>
   );
@@ -222,233 +290,170 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 32,
+    marginBottom: 24,
   },
-  greetingRowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  greetingTitle: {
-    fontSize: 28,
+  greeting: {
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    lineHeight: 34,
   },
-  greetingName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    lineHeight: 34,
-  },
-  headerRight: {
-     alignItems: 'flex-end',
-     gap: 12,
-  },
-  weatherWidget: {
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  weatherTemp: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    marginTop: 4,
+  subtitle: {
     fontSize: 14,
-  },
-  bellButton: {
-    position: 'relative',
-    marginTop: 8,
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 0,
-    right: 2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#EF4444',
-  },
-  statsScroll: {
-    marginBottom: 32,
-  },
-  statsScrollContent: {
-    paddingHorizontal: 24,
-    gap: 16,
-  },
-  statCard: {
-    width: 150,
-    height: 170,
-    backgroundColor: '#102815',
-    borderRadius: 24,
-    padding: 16,
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#1D3B24',
-  },
-  cardTop: {
-     alignItems: 'flex-start',
-  },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  cardLabel: {
-    color: '#A0A0A0',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  cardValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  trendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  trendIcon: {
-    color: '#00E632',
-    fontSize: 16,
-  },
-  trendText: {
-    color: '#00E632',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  progressBarContainer: {
-    height: 6,
-    backgroundColor: '#1D3B24',
-    borderRadius: 3,
-    width: '100%',
-    marginBottom: 6,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#00E632',
-    borderRadius: 3,
-  },
-  progressText: {
     color: '#8BA890',
-    fontSize: 11,
-    fontWeight: '500', 
+    marginTop: 4,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginLeft: 24,
-    marginBottom: 16,
-  },
-  actionRow: {
+  statsGrid: {
     flexDirection: 'row',
-    paddingHorizontal: 24,
-    gap: 16,
-    marginBottom: 32,
-  },
-  actionButton: {
-    flex: 1,
-    height: 140,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-    shadowColor: "#00E632",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  primaryBtn: {
-    backgroundColor: '#00E632',
-  },
-  secondaryBtn: {
-    backgroundColor: '#0D1F12', 
-    borderWidth: 1,
-    borderColor: '#1D3B24',
-  },
-  btnIconCircleBlack: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  btnIconCircleGreen: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(0, 230, 50, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  primaryBtnText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#051207', 
-  },
-  secondaryBtnText: {
-     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingRight: 24,
-    marginBottom: 16,
-  },
-  viewAllText: {
-    color: '#00E632',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  activityList: {
+    flexWrap: 'wrap',
     paddingHorizontal: 24,
     gap: 12,
+    marginBottom: 28,
   },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#102815',
-    padding: 16,
+  statCard: {
+    width: '47%',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  statGradient: {
+    padding: 18,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#1D3B24',
   },
-  activityIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  statIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginBottom: 14,
   },
-  activityContent: {
+  statNumber: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  statLabel: {
+    fontSize: 13,
+    color: '#8BA890',
+    marginTop: 4,
+  },
+  section: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 14,
+  },
+  summaryCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#1D3B24',
+    padding: 20,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#8BA890',
+  },
+  summaryValue: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#00E632',
+  },
+  farmBreakdownCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  farmBreakdownGradient: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#1D3B24',
+    padding: 18,
+  },
+  farmBreakdownHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 14,
+  },
+  farmBreakdownIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 230, 50, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  farmBreakdownName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  farmBreakdownStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  farmBreakdownStat: {
+    alignItems: 'center',
     flex: 1,
   },
-  activityTitle: {
+  fbStatNum: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  fbStatLabel: {
+    fontSize: 11,
+    color: '#8BA890',
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  fbDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#1D3B24',
+  },
+  noFarmBanner: {
+    marginHorizontal: 24,
+    marginBottom: 24,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  noFarmGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    gap: 16,
+    borderWidth: 1,
+    borderColor: '#00E632',
+    borderRadius: 20,
+  },
+  noFarmTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 4,
   },
-  activitySubtitle: {
+  noFarmSubtitle: {
     fontSize: 13,
     color: '#8BA890',
-  },
-  activityTime: {
-    color: '#8BA890',
-    fontSize: 12,
-    fontWeight: '500',
   },
 });
