@@ -12,11 +12,10 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { apiClient } from '../../lib/api';
-import { useFarm } from '../../contexts/FarmContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../../lib/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type Worker = {
   _id: string;
@@ -27,10 +26,10 @@ type Worker = {
   avatarUrl?: string;
 };
 
-export default function WorkersScreen() {
+export default function FarmWorkersScreen() {
+  const { farmId } = useLocalSearchParams<{ farmId: string }>();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const { selectedFarm } = useFarm();
   const [search, setSearch] = useState('');
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +37,7 @@ export default function WorkersScreen() {
 
   const fetchWorkers = async () => {
     try {
-      const data = await apiClient.getWorkers(selectedFarm?._id);
+      const data = await apiClient.getWorkers(farmId);
       setWorkers(data);
     } catch {
       Alert.alert('Error', 'Could not load workers.');
@@ -56,7 +55,7 @@ export default function WorkersScreen() {
       }
       setLoading(true);
       fetchWorkers();
-    }, [selectedFarm?._id, isAuthenticated])
+    }, [farmId, isAuthenticated])
   );
 
   const filtered = workers.filter(
@@ -92,7 +91,7 @@ export default function WorkersScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Farm Workers</Text>
+        <Text style={styles.headerTitle}>Workers</Text>
       </View>
 
       {/* Search */}
@@ -161,140 +160,45 @@ export default function WorkersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#051207',
-  },
+  container: { flex: 1, backgroundColor: '#051207' },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16,
   },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 26,
-    fontWeight: 'bold',
-  },
-  filterBtn: {
-    padding: 4,
-  },
+  headerTitle: { color: '#FFFFFF', fontSize: 26, fontWeight: 'bold' },
   searchWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#102815',
-    borderRadius: 14,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#1D3B24',
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#102815',
+    borderRadius: 14, marginHorizontal: 20, marginBottom: 20,
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderWidth: 1, borderColor: '#1D3B24',
   },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#FFFFFF',
-    fontSize: 15,
-  },
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    gap: 12,
-  },
+  searchIcon: { marginRight: 10 },
+  searchInput: { flex: 1, color: '#FFFFFF', fontSize: 15 },
+  listContent: { paddingHorizontal: 20, paddingBottom: 16, gap: 12 },
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#102815',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#1D3B24',
-    padding: 14,
-    gap: 14,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#102815',
+    borderRadius: 16, borderWidth: 1, borderColor: '#1D3B24', padding: 14, gap: 14,
   },
-  avatarWrap: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#1D3B24',
-  },
-  statusDot: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#102815',
-  },
-  info: {
-    flex: 1,
-  },
-  workerName: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  workerRole: {
-    color: '#8BA890',
-    fontSize: 14,
-  },
+  avatarWrap: { position: 'relative' },
+  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#1D3B24' },
+  avatarPlaceholder: { justifyContent: 'center', alignItems: 'center' },
+  info: { flex: 1 },
+  workerName: { color: '#FFFFFF', fontSize: 17, fontWeight: 'bold', marginBottom: 3 },
+  workerRole: { color: '#8BA890', fontSize: 14 },
   callBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#1D3B24',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 44, height: 44, borderRadius: 22, backgroundColor: '#1D3B24',
+    justifyContent: 'center', alignItems: 'center',
   },
   footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-    paddingTop: 12,
-    backgroundColor: '#051207',
+    paddingHorizontal: 20, paddingBottom: 32, paddingTop: 12, backgroundColor: '#051207',
   },
   addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#00E632',
-    borderRadius: 16,
-    paddingVertical: 18,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#00E632', borderRadius: 16, paddingVertical: 18,
   },
-  addBtnText: {
-    color: '#051207',
-    fontSize: 17,
-    fontWeight: 'bold',
-  },
-  avatarPlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  emptyText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  emptySubText: {
-    color: '#8BA890',
-    fontSize: 14,
-  },
+  addBtnText: { color: '#051207', fontSize: 17, fontWeight: 'bold' },
+  emptyState: { alignItems: 'center', paddingTop: 60 },
+  emptyEmoji: { fontSize: 48, marginBottom: 12 },
+  emptyText: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold', marginBottom: 6 },
+  emptySubText: { color: '#8BA890', fontSize: 14 },
 });

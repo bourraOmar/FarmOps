@@ -2,6 +2,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { FarmProvider } from '../contexts/FarmContext';
 import { StatusBar } from 'expo-status-bar';
 
 function RootLayoutNav() {
@@ -20,7 +21,7 @@ function RootLayoutNav() {
       segments[0] === 'index' || 
       segments[0] === 'login' || 
       segments[0] === 'signup' || 
-      segments.length === 0;
+      segments.length < 1;
 
     console.log('[NAV] Segment:', segments, 'IsAuth:', isAuthenticated);
 
@@ -53,6 +54,9 @@ function RootLayoutNav() {
         <Stack.Screen name="signup" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="index" />
+        <Stack.Screen name="create-farm" />
+        <Stack.Screen name="manage-farms" />
+        <Stack.Screen name="farm/[farmId]" />
       </Stack>
       <StatusBar style="light" backgroundColor="#051207" />
     </>
@@ -62,7 +66,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <FarmProvider>
+        <RootLayoutNav />
+      </FarmProvider>
     </AuthProvider>
   );
 }

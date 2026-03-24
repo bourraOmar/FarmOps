@@ -15,12 +15,17 @@ export class MilkService {
     return new this.milkModel({
       ...dto,
       userId,
+      farmId: new Types.ObjectId(dto.farmId),
       animalId: new Types.ObjectId(dto.animalId),
     }).save();
   }
 
-  async findAll(userId: string): Promise<MilkRecord[]> {
-    return this.milkModel.find({ userId }).sort({ createdAt: -1 }).exec();
+  async findAll(userId: string, farmId?: string): Promise<MilkRecord[]> {
+    const filter: any = { userId };
+    if (farmId) {
+      filter.farmId = new Types.ObjectId(farmId);
+    }
+    return this.milkModel.find(filter).sort({ createdAt: -1 }).exec();
   }
 
   async findByAnimal(animalId: string, userId: string): Promise<MilkRecord[]> {
@@ -30,7 +35,7 @@ export class MilkService {
       .exec();
   }
 
-  async getStats(userId: string): Promise<{ totalToday: number; totalThisMonth: number; recordCount: number }> {
+  async getStats(userId: string, farmId?: string): Promise<{ totalToday: number; totalThisMonth: number; recordCount: number }> {
     const today = new Date();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -38,10 +43,15 @@ export class MilkService {
     const todayStr = `${mm}/${dd}/${yyyy}`;
     const monthPrefix = `${mm}/`;
 
+    const filter: any = { userId };
+    if (farmId) {
+      filter.farmId = new Types.ObjectId(farmId);
+    }
+
     const [allRecords, todayRecords, monthRecords] = await Promise.all([
-      this.milkModel.find({ userId }).exec(),
-      this.milkModel.find({ userId, date: todayStr }).exec(),
-      this.milkModel.find({ userId, date: { $regex: `^${monthPrefix}` } }).exec(),
+      this.milkModel.find(filter).exec(),
+      this.milkModel.find({ ...filter, date: todayStr }).exec(),
+      this.milkModel.find({ ...filter, date: { $regex: `^${monthPrefix}` } }).exec(),
     ]);
 
     return {
@@ -53,5 +63,9 @@ export class MilkService {
 
   async remove(id: string, userId: string): Promise<void> {
     await this.milkModel.findOneAndDelete({ _id: id, userId }).exec();
+  }
+
+  async removeAllByFarm(farmId: string, userId: string): Promise<void> {
+    await this.milkModel.deleteMany({ farmId: new Types.ObjectId(farmId), userId }).exec();
   }
 }

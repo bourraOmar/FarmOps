@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { LivestockService } from './livestock.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
@@ -15,19 +15,19 @@ export class LivestockController {
   }
 
   @Get()
-  async findAll(@Request() req: any): Promise<Animal[]> {
-    return this.livestockService.findAll(req.user._id);
+  async findAll(@Request() req: any, @Query('farmId') farmId?: string): Promise<Animal[]> {
+    return this.livestockService.findAll(req.user._id, farmId);
   }
 
   @Get('stats')
-  async getStats(@Request() req: any): Promise<{ totalAnimals: number }> {
-    const total = await this.livestockService.countAll(req.user._id);
+  async getStats(@Request() req: any, @Query('farmId') farmId?: string): Promise<{ totalAnimals: number }> {
+    const total = await this.livestockService.countAll(req.user._id, farmId);
     return { totalAnimals: total };
   }
 
   @Get('next-tag-id')
-  async getNextTagId(@Request() req: any): Promise<{ tagId: string }> {
-    const tagId = await this.livestockService.nextTagId(req.user._id);
+  async getNextTagId(@Request() req: any, @Query('farmId') farmId?: string): Promise<{ tagId: string }> {
+    const tagId = await this.livestockService.nextTagId(req.user._id, farmId);
     return { tagId };
   }
 
