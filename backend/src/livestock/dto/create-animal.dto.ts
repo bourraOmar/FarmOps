@@ -1,4 +1,5 @@
 export class CreateAnimalDto {
+  readonly farmId: string;
   readonly name: string;
   readonly tagId?: string;
   readonly breed?: string;
