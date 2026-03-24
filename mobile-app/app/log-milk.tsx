@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '../lib/api';
+import { useFarm } from '../contexts/FarmContext';
 
 const SESSIONS = ['Morning', 'Evening', 'Night'] as const;
 const SESSION_ICONS: Record<string, string> = {
@@ -22,10 +23,11 @@ const SESSION_ICONS: Record<string, string> = {
   Night: '🌙',
 };
 
-type Animal = { _id: string; name: string; tagId?: string };
+type Animal = { _id: string; name: string; tagId?: string; gender?: 'Male' | 'Female' };
 
 export default function LogMilkScreen() {
   const router = useRouter();
+  const { selectedFarm } = useFarm();
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
   const [session, setSession] = useState<'Morning' | 'Evening' | 'Night'>('Morning');
@@ -43,8 +45,10 @@ export default function LogMilkScreen() {
     const yyyy = today.getFullYear();
     setDate(`${mm}/${dd}/${yyyy}`);
 
-    apiClient.getAnimals().then((data: Animal[]) => setAnimals(data)).catch(() => {});
-  }, []);
+    apiClient.getAnimals(selectedFarm?._id)
+      .then((data: Animal[]) => setAnimals(data.filter(a => a.gender === 'Female')))
+      .catch(() => {});
+  }, [selectedFarm?._id]);
 
   const handleDateChange = (text: string) => {
     const digits = text.replace(/\D/g, '');
@@ -72,9 +76,15 @@ export default function LogMilkScreen() {
       return;
     }
 
+    if (!selectedFarm) {
+      Alert.alert('No Farm Selected', 'Please select or create a farm first.');
+      return;
+    }
+
     setLoading(true);
     try {
       await apiClient.createMilkRecord({
+        farmId: selectedFarm._id,
         animalId: selectedAnimal._id,
         date,
         amountLiters: liters,
@@ -121,7 +131,7 @@ export default function LogMilkScreen() {
             {animalDropdownOpen && (
               <View style={styles.dropdown}>
                 {animals.length === 0 ? (
-                  <Text style={styles.dropdownEmpty}>No animals found</Text>
+                  <Text style={styles.dropdownEmpty}>No female animals found</Text>
                 ) : (
                   animals.map((a) => (
                     <TouchableOpacity
