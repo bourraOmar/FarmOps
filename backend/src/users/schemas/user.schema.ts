@@ -24,6 +24,13 @@ export class User {
 
   @Prop({ required: true, enum: ['admin', 'farmer'], default: 'farmer' })
   role: string;
+
+  @Prop({
+    required: true,
+    enum: ['pending', 'approved', 'banned'],
+    default: 'pending',
+  })
+  status: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
