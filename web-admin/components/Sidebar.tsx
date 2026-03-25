@@ -11,13 +11,17 @@ import {
   Droplets,
   Warehouse,
   Settings,
-  LogOut
+  LogOut,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { apiClient, User } from '@/lib/api';
 
 const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -100,10 +104,15 @@ const Sidebar = () => {
 
         <div className="pt-4">
           <p className="text-xs font-semibold text-gray-400 uppercase px-3 mb-2">Système</p>
-          <Link href="/settings" className={navItemClass('/settings')}>
-            <Settings className="w-5 h-5" />
-            Paramètres
-          </Link>
+          <button 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-indigo-500" />}
+              <span>Mode {theme === 'dark' ? 'Clair' : 'Sombre'}</span>
+            </div>
+          </button>
         </div>
       </nav>
 
