@@ -10,6 +10,7 @@ export interface User {
   role: string;
   cin?: string;
   phone: string;
+  status?: 'pending' | 'approved' | 'banned';
 }
 
 export interface Farm {
@@ -43,6 +44,14 @@ export interface CreateAnimalPayload {
   photoUrl?: string;
 }
 
+// Global event listener for account status changes (banned/pending)
+type AccountStatusCallback = (type: 'banned' | 'pending', message: string) => void;
+let _onAccountStatusChange: AccountStatusCallback | null = null;
+
+export function setAccountStatusListener(cb: AccountStatusCallback | null) {
+  _onAccountStatusChange = cb;
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -54,6 +63,7 @@ class ApiClient {
       headers: { 'Content-Type': 'application/json' },
     });
 
+    // Request interceptor: attach JWT token
     this.client.interceptors.request.use(
       async (config) => {
         const token = await AsyncStorage.getItem('access_token');
@@ -63,6 +73,30 @@ class ApiClient {
         return config;
       },
       (error) => Promise.reject(error)
+    );
+
+    // Response interceptor: catch banned/pending on ANY API call
+    this.client.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const errorCode = error.response?.data?.error;
+        const message = error.response?.data?.message || '';
+
+        if (errorCode === 'ACCOUNT_BANNED' || errorCode === 'ACCOUNT_PENDING') {
+          // Clear stored credentials immediately
+          await AsyncStorage.removeItem('access_token');
+          await AsyncStorage.removeItem('user');
+          await AsyncStorage.removeItem('selected_farm_id');
+
+          // Notify the listener (AuthContext)
+          const type = errorCode === 'ACCOUNT_BANNED' ? 'banned' : 'pending';
+          if (_onAccountStatusChange) {
+            _onAccountStatusChange(type, message);
+          }
+        }
+
+        return Promise.reject(error);
+      }
     );
   }
 
