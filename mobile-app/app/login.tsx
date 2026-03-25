@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Sprout } from 'lucide-react-native'; 
+import { Eye, EyeOff, Sprout, ShieldX, Clock, ArrowLeft } from 'lucide-react-native'; 
 import { FontAwesome5, FontAwesome6 } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
 
@@ -14,6 +14,13 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+
+  // Account status modal
+  const [statusModal, setStatusModal] = useState<{
+    visible: boolean;
+    type: 'banned' | 'pending' | null;
+    message: string;
+  }>({ visible: false, type: null, message: '' });
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -28,8 +35,16 @@ export default function LoginScreen() {
       router.replace('/(tabs)');
     } catch (error: any) {
       console.log('=== LOGIN ERROR ===', error.message);
+      const errorCode = error.response?.data?.error;
       const msg = error.response?.data?.message || error.message || 'Connexion échouée';
-      alert(msg);
+
+      if (errorCode === 'ACCOUNT_BANNED') {
+        setStatusModal({ visible: true, type: 'banned', message: msg });
+      } else if (errorCode === 'ACCOUNT_PENDING') {
+        setStatusModal({ visible: true, type: 'pending', message: msg });
+      } else {
+        alert(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -121,9 +136,161 @@ export default function LoginScreen() {
 
         </View>
       </ScrollView>
+
+      {/* Account Status Modal */}
+      <Modal
+        visible={statusModal.visible}
+        animationType="slide"
+        transparent={false}
+      >
+        <View style={[
+          statusModalStyles.container,
+          statusModal.type === 'banned' ? statusModalStyles.bannedBg : statusModalStyles.pendingBg,
+        ]}>
+          <View style={statusModalStyles.content}>
+            {/* Icon */}
+            <View style={[
+              statusModalStyles.iconCircle,
+              statusModal.type === 'banned' ? statusModalStyles.bannedIcon : statusModalStyles.pendingIcon,
+            ]}>
+              {statusModal.type === 'banned' ? (
+                <ShieldX size={48} color="#EF4444" />
+              ) : (
+                <Clock size={48} color="#F59E0B" />
+              )}
+            </View>
+
+            {/* Title */}
+            <Text style={statusModalStyles.title}>
+              {statusModal.type === 'banned'
+                ? 'Compte Suspendu'
+                : 'En Attente d\'Approbation'}
+            </Text>
+
+            {/* Message */}
+            <Text style={statusModalStyles.message}>
+              {statusModal.message}
+            </Text>
+
+            {/* Additional Info */}
+            <View style={[
+              statusModalStyles.infoBox,
+              statusModal.type === 'banned' ? statusModalStyles.bannedInfoBox : statusModalStyles.pendingInfoBox,
+            ]}>
+              <Text style={statusModalStyles.infoText}>
+                {statusModal.type === 'banned'
+                  ? 'Votre compte a été suspendu par l\'administrateur. Si vous pensez qu\'il s\'agit d\'une erreur, veuillez contacter le support.'
+                  : 'Votre inscription a bien été enregistrée. Un administrateur doit approuver votre compte avant que vous puissiez vous connecter. Vous recevrez une notification une fois approuvé.'}
+              </Text>
+            </View>
+
+            {/* Dismiss Button */}
+            <TouchableOpacity
+              style={[
+                statusModalStyles.button,
+                statusModal.type === 'banned' ? statusModalStyles.bannedButton : statusModalStyles.pendingButton,
+              ]}
+              onPress={() => setStatusModal({ visible: false, type: null, message: '' })}
+            >
+              <ArrowLeft size={20} color="#FFFFFF" />
+              <Text style={statusModalStyles.buttonText}>Retour à la connexion</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 }
+
+const statusModalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  bannedBg: {
+    backgroundColor: '#1A0505',
+  },
+  pendingBg: {
+    backgroundColor: '#1A1205',
+  },
+  content: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  bannedIcon: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+  },
+  pendingIcon: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 16,
+    color: '#CCCCCC',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  infoBox: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 32,
+  },
+  bannedInfoBox: {
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  pendingInfoBox: {
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#AAAAAA',
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    width: '100%',
+    height: 56,
+    borderRadius: 28,
+  },
+  bannedButton: {
+    backgroundColor: '#EF4444',
+  },
+  pendingButton: {
+    backgroundColor: '#F59E0B',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

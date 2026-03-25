@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Sprout } from 'lucide-react-native';
+import { Eye, EyeOff, Sprout, Clock, ArrowLeft } from 'lucide-react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
 
@@ -13,6 +13,7 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [pendingScreen, setPendingScreen] = useState(false);
 
   const handleSignup = async () => {
     if (!form.fullName || !form.email || !form.phone || !form.password) {
@@ -31,12 +32,18 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       console.log('=== SIGNUP ATTEMPT ===', form.email);
-      await signup({
+      const result = await signup({
         fullName: form.fullName, email: form.email, phone: form.phone,
         password: form.password, cin: form.cin || undefined
       });
-      console.log('=== SIGNUP SUCCESS ===');
-      router.replace('/(tabs)');
+      console.log('=== SIGNUP SUCCESS ===', result.status);
+
+      if (result.status === 'pending') {
+        // Show pending approval screen
+        setPendingScreen(true);
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error: any) {
       console.log('=== SIGNUP ERROR ===', error.message);
       const msg = error.response?.data?.message || 'Erreur réseau ou interne';
@@ -45,6 +52,55 @@ export default function SignupScreen() {
       setLoading(false);
     }
   };
+
+  // Show pending approval full screen
+  if (pendingScreen) {
+    return (
+      <View style={pendingStyles.container}>
+        <View style={pendingStyles.content}>
+          <View style={pendingStyles.iconCircle}>
+            <Clock size={56} color="#F59E0B" />
+          </View>
+          <Text style={pendingStyles.title}>Inscription Réussie !</Text>
+          <Text style={pendingStyles.subtitle}>
+            Votre compte est en attente d'approbation
+          </Text>
+          <View style={pendingStyles.infoBox}>
+            <Text style={pendingStyles.infoText}>
+              Un administrateur doit approuver votre compte avant que vous puissiez
+              vous connecter. Vous serez notifié une fois votre compte activé.
+            </Text>
+          </View>
+          <View style={pendingStyles.stepsContainer}>
+            <View style={pendingStyles.step}>
+              <View style={[pendingStyles.stepDot, pendingStyles.stepDotDone]} />
+              <Text style={pendingStyles.stepText}>Inscription</Text>
+              <Text style={pendingStyles.stepStatus}>✅ Terminé</Text>
+            </View>
+            <View style={pendingStyles.stepLine} />
+            <View style={pendingStyles.step}>
+              <View style={[pendingStyles.stepDot, pendingStyles.stepDotActive]} />
+              <Text style={pendingStyles.stepText}>Approbation Admin</Text>
+              <Text style={[pendingStyles.stepStatus, { color: '#F59E0B' }]}>⏳ En attente</Text>
+            </View>
+            <View style={pendingStyles.stepLine} />
+            <View style={pendingStyles.step}>
+              <View style={pendingStyles.stepDot} />
+              <Text style={pendingStyles.stepText}>Accès à l'application</Text>
+              <Text style={pendingStyles.stepStatus}>⬜ À venir</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={pendingStyles.button}
+            onPress={() => router.replace('/login')}
+          >
+            <ArrowLeft size={20} color="#1A1205" />
+            <Text style={pendingStyles.buttonText}>Retour à la connexion</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
@@ -336,5 +392,114 @@ const styles = StyleSheet.create({
     color: '#77B254',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+});
+
+const pendingStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1A1205',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  content: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#F59E0B',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  infoBox: {
+    width: '100%',
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 32,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#AAAAAA',
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  stepsContainer: {
+    width: '100%',
+    marginBottom: 32,
+    paddingHorizontal: 16,
+  },
+  step: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  stepDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#333',
+    borderWidth: 2,
+    borderColor: '#555',
+  },
+  stepDotDone: {
+    backgroundColor: '#22C55E',
+    borderColor: '#22C55E',
+  },
+  stepDotActive: {
+    backgroundColor: '#F59E0B',
+    borderColor: '#F59E0B',
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#CCCCCC',
+    fontWeight: '500',
+  },
+  stepStatus: {
+    fontSize: 13,
+    color: '#888',
+  },
+  stepLine: {
+    width: 2,
+    height: 20,
+    backgroundColor: '#333',
+    marginLeft: 6,
+    marginVertical: 4,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    width: '100%',
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#F59E0B',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1A1205',
   },
 });
