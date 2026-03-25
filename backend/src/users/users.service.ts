@@ -12,6 +12,10 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
+  async findOneById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id).exec();
+  }
+
   async create(userDto: any): Promise<UserDocument> {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(userDto.password, salt);
