@@ -53,8 +53,11 @@ export default function FarmHomeScreen() {
         milkMonth: milkStats.totalThisMonth,
         milkRecords: milkStats.recordCount,
       });
-    } catch (e) {
-      console.error('Failed to load farm data:', e);
+    } catch (e: any) {
+      // Don't log 403 (Banned/Pending) or 401 (Unauthorized) errors since the global interceptor handles them
+      if (e.response?.status !== 403 && e.response?.status !== 401) {
+        console.error('Failed to load farm data:', e);
+      }
     } finally {
       setLoading(false);
     }
