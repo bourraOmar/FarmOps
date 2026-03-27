@@ -5,10 +5,12 @@ on:
     branches: [ "main", "master" ]
     paths:
       - 'mobile-app/**'
+      - '.github/workflows/ci-mobile-app.yml'
   pull_request:
     branches: [ "main", "master" ]
     paths:
       - 'mobile-app/**'
+      - '.github/workflows/ci-mobile-app.yml'
 
 jobs:
   build:
