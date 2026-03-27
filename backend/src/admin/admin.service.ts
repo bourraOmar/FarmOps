@@ -453,8 +453,6 @@ export class AdminService {
     // Get all farms for this farmer
     const farms = await this.farmModel.find({ userId }).lean().exec();
 
-    const farmIds = farms.map((f) => f._id);
-
     // Get all animals for this farmer
     const animals = await this.animalModel
       .find({ userId })
