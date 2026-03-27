@@ -19,7 +19,7 @@ export class WorkersService {
   }
 
   async findAll(userId: string, farmId?: string): Promise<Worker[]> {
-    const filter: any = { userId };
+    const filter: Record<string, any> = { userId };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
@@ -30,8 +30,14 @@ export class WorkersService {
     return this.workerModel.findOne({ _id: id, userId }).exec();
   }
 
-  async update(id: string, userId: string, dto: Partial<CreateWorkerDto>): Promise<Worker | null> {
-    return this.workerModel.findOneAndUpdate({ _id: id, userId }, dto, { new: true }).exec();
+  async update(
+    id: string,
+    userId: string,
+    dto: Partial<CreateWorkerDto>,
+  ): Promise<Worker | null> {
+    return this.workerModel
+      .findOneAndUpdate({ _id: id, userId }, dto, { new: true })
+      .exec();
   }
 
   async remove(id: string, userId: string): Promise<void> {
@@ -39,7 +45,7 @@ export class WorkersService {
   }
 
   async countAll(userId: string, farmId?: string): Promise<number> {
-    const filter: any = { userId };
+    const filter: Record<string, any> = { userId };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
@@ -47,6 +53,8 @@ export class WorkersService {
   }
 
   async removeAllByFarm(farmId: string, userId: string): Promise<void> {
-    await this.workerModel.deleteMany({ farmId: new Types.ObjectId(farmId), userId }).exec();
+    await this.workerModel
+      .deleteMany({ farmId: new Types.ObjectId(farmId), userId })
+      .exec();
   }
 }

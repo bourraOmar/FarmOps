@@ -4,7 +4,10 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Farm, FarmDocument } from '../farms/schemas/farm.schema';
 import { Animal, AnimalDocument } from '../livestock/schemas/animal.schema';
-import { MilkRecord, MilkRecordDocument } from '../milk/schemas/milk-record.schema';
+import {
+  MilkRecord,
+  MilkRecordDocument,
+} from '../milk/schemas/milk-record.schema';
 import { Worker, WorkerDocument } from '../workers/schemas/worker.schema';
 
 export interface AdminStats {
@@ -197,7 +200,13 @@ export class AdminService {
     const todayStr = `${mm}/${dd}/${yyyy}`;
 
     const [farms, total] = await Promise.all([
-      this.farmModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).lean().exec(),
+      this.farmModel
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec(),
       this.farmModel.countDocuments().exec(),
     ]);
 
@@ -270,15 +279,29 @@ export class AdminService {
     }
 
     const [animals, total] = await Promise.all([
-      this.animalModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).lean().exec(),
+      this.animalModel
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec(),
       this.animalModel.countDocuments(query).exec(),
     ]);
 
     const animalsWithDetails = await Promise.all(
       animals.map(async (animal) => {
         const [owner, farm] = await Promise.all([
-          this.userModel.findById(animal.userId).select('fullName').lean().exec(),
-          this.farmModel.findById(animal.farmId).select('name location').lean().exec(),
+          this.userModel
+            .findById(animal.userId)
+            .select('fullName')
+            .lean()
+            .exec(),
+          this.farmModel
+            .findById(animal.farmId)
+            .select('name location')
+            .lean()
+            .exec(),
         ]);
 
         return {
@@ -428,10 +451,7 @@ export class AdminService {
     const userId = farmer._id.toString();
 
     // Get all farms for this farmer
-    const farms = await this.farmModel
-      .find({ userId })
-      .lean()
-      .exec();
+    const farms = await this.farmModel.find({ userId }).lean().exec();
 
     const farmIds = farms.map((f) => f._id);
 
@@ -443,10 +463,7 @@ export class AdminService {
       .exec();
 
     // Get all workers for this farmer's farms
-    const workers = await this.workerModel
-      .find({ userId })
-      .lean()
-      .exec();
+    const workers = await this.workerModel.find({ userId }).lean().exec();
 
     // Get recent milk records
     const recentMilkRecords = await this.milkModel

@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { WorkersService } from './workers.service';
 import { CreateWorkerDto } from './dto/create-worker.dto';
@@ -10,23 +23,32 @@ export class WorkersController {
   constructor(private readonly workersService: WorkersService) {}
 
   @Post()
-  async create(@Request() req: any, @Body() dto: CreateWorkerDto): Promise<Worker> {
+  async create(
+    @Request() req: { user: { _id: string; [key: string]: any } },
+    @Body() dto: CreateWorkerDto,
+  ): Promise<Worker> {
     return this.workersService.create(req.user._id, dto);
   }
 
   @Get()
-  async findAll(@Request() req: any, @Query('farmId') farmId?: string): Promise<Worker[]> {
+  async findAll(
+    @Request() req: { user: { _id: string; [key: string]: any } },
+    @Query('farmId') farmId?: string,
+  ): Promise<Worker[]> {
     return this.workersService.findAll(req.user._id, farmId);
   }
 
   @Get(':id')
-  async findOne(@Request() req: any, @Param('id') id: string): Promise<Worker | null> {
+  async findOne(
+    @Request() req: { user: { _id: string; [key: string]: any } },
+    @Param('id') id: string,
+  ): Promise<Worker | null> {
     return this.workersService.findOne(id, req.user._id);
   }
 
   @Patch(':id')
   async update(
-    @Request() req: any,
+    @Request() req: { user: { _id: string; [key: string]: any } },
     @Param('id') id: string,
     @Body() dto: Partial<CreateWorkerDto>,
   ): Promise<Worker | null> {
@@ -35,7 +57,10 @@ export class WorkersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Request() req: any, @Param('id') id: string): Promise<void> {
+  async remove(
+    @Request() req: { user: { _id: string; [key: string]: any } },
+    @Param('id') id: string,
+  ): Promise<void> {
     return this.workersService.remove(id, req.user._id);
   }
 }

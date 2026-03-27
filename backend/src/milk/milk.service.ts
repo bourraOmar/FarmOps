@@ -21,7 +21,7 @@ export class MilkService {
   }
 
   async findAll(userId: string, farmId?: string): Promise<MilkRecord[]> {
-    const filter: any = { userId };
+    const filter: Record<string, any> = { userId };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
@@ -35,7 +35,14 @@ export class MilkService {
       .exec();
   }
 
-  async getStats(userId: string, farmId?: string): Promise<{ totalToday: number; totalThisMonth: number; recordCount: number }> {
+  async getStats(
+    userId: string,
+    farmId?: string,
+  ): Promise<{
+    totalToday: number;
+    totalThisMonth: number;
+    recordCount: number;
+  }> {
     const today = new Date();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -43,7 +50,7 @@ export class MilkService {
     const todayStr = `${mm}/${dd}/${yyyy}`;
     const monthPrefix = `${mm}/`;
 
-    const filter: any = { userId };
+    const filter: Record<string, any> = { userId };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
@@ -51,7 +58,9 @@ export class MilkService {
     const [allRecords, todayRecords, monthRecords] = await Promise.all([
       this.milkModel.find(filter).exec(),
       this.milkModel.find({ ...filter, date: todayStr }).exec(),
-      this.milkModel.find({ ...filter, date: { $regex: `^${monthPrefix}` } }).exec(),
+      this.milkModel
+        .find({ ...filter, date: { $regex: `^${monthPrefix}` } })
+        .exec(),
     ]);
 
     return {
@@ -66,6 +75,8 @@ export class MilkService {
   }
 
   async removeAllByFarm(farmId: string, userId: string): Promise<void> {
-    await this.milkModel.deleteMany({ farmId: new Types.ObjectId(farmId), userId }).exec();
+    await this.milkModel
+      .deleteMany({ farmId: new Types.ObjectId(farmId), userId })
+      .exec();
   }
 }

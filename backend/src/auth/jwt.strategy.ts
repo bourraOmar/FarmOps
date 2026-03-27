@@ -1,6 +1,10 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { jwtConstants } from './constants';
 import { UsersService } from '../users/users.service';
 
@@ -27,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (user.status === 'banned') {
         throw new ForbiddenException({
           statusCode: 403,
-          message: 'Votre compte a été suspendu. Contactez l\'administrateur.',
+          message: "Votre compte a été suspendu. Contactez l'administrateur.",
           error: 'ACCOUNT_BANNED',
         });
       }
@@ -35,7 +39,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (user.status === 'pending') {
         throw new ForbiddenException({
           statusCode: 403,
-          message: 'Votre compte est en attente d\'approbation par l\'administrateur.',
+          message:
+            "Votre compte est en attente d'approbation par l'administrateur.",
           error: 'ACCOUNT_PENDING',
         });
       }

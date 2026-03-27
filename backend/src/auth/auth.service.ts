@@ -30,7 +30,7 @@ export class AuthService {
       if (user.status === 'banned') {
         throw new ForbiddenException({
           statusCode: 403,
-          message: 'Votre compte a ete suspendu. Contactez l\'administrateur.',
+          message: "Votre compte a ete suspendu. Contactez l'administrateur.",
           error: 'ACCOUNT_BANNED',
         });
       }
@@ -38,7 +38,7 @@ export class AuthService {
         throw new ForbiddenException({
           statusCode: 403,
           message:
-            'Votre compte est en attente d\'approbation par l\'administrateur.',
+            "Votre compte est en attente d'approbation par l'administrateur.",
           error: 'ACCOUNT_PENDING',
         });
       }
@@ -75,7 +75,7 @@ export class AuthService {
     // Return success but with pending status info
     return {
       message:
-        'Inscription reussie. Votre compte est en attente d\'approbation par l\'administrateur.',
+        "Inscription reussie. Votre compte est en attente d'approbation par l'administrateur.",
       status: 'pending',
       user: {
         _id: user._id,

@@ -19,13 +19,13 @@ export class UsersService {
   async create(userDto: any): Promise<UserDocument> {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(userDto.password, salt);
-    
+
     // Create new object dropping falsy cin to maintain sparse indexing in MongoDB
     const data = { ...userDto, password: hashedPassword };
     if (!data.cin) {
-        delete data.cin;
+      delete data.cin;
     }
-    
+
     const newUser = new this.userModel(data);
     return newUser.save();
   }

@@ -5,7 +5,9 @@ import { FarmsService } from './farms.service';
 import { Farm, FarmSchema } from './schemas/farm.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Farm.name, schema: FarmSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Farm.name, schema: FarmSchema }]),
+  ],
   controllers: [FarmsController],
   providers: [FarmsService],
   exports: [FarmsService],

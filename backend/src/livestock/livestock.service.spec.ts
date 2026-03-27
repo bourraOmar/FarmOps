@@ -40,9 +40,9 @@ describe('LivestockService', () => {
   describe('findAll', () => {
     it('should return an array of animals for a specific userId', async () => {
       const userId = 'user123';
-      
+
       const result = await service.findAll(userId);
-      
+
       expect(mockAnimalModel.find).toHaveBeenCalledWith({ userId });
       expect(result).toEqual([{ name: 'Bessie', species: 'Cow' }]);
     });

@@ -5,7 +5,10 @@ import { AdminService } from './admin.service';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { Farm, FarmSchema } from '../farms/schemas/farm.schema';
 import { Animal, AnimalSchema } from '../livestock/schemas/animal.schema';
-import { MilkRecord, MilkRecordSchema } from '../milk/schemas/milk-record.schema';
+import {
+  MilkRecord,
+  MilkRecordSchema,
+} from '../milk/schemas/milk-record.schema';
 import { Worker, WorkerSchema } from '../workers/schemas/worker.schema';
 
 @Module({

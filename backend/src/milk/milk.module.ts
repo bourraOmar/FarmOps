@@ -6,7 +6,9 @@ import { MilkRecord, MilkRecordSchema } from './schemas/milk-record.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: MilkRecord.name, schema: MilkRecordSchema }]),
+    MongooseModule.forFeature([
+      { name: MilkRecord.name, schema: MilkRecordSchema },
+    ]),
   ],
   controllers: [MilkController],
   providers: [MilkService],

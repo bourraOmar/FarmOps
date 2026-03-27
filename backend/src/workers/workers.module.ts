@@ -5,7 +5,9 @@ import { WorkersService } from './workers.service';
 import { Worker, WorkerSchema } from './schemas/worker.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Worker.name, schema: WorkerSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Worker.name, schema: WorkerSchema }]),
+  ],
   controllers: [WorkersController],
   providers: [WorkersService],
 })

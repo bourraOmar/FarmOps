@@ -10,7 +10,10 @@ export class LivestockService {
     @InjectModel(Animal.name) private animalModel: Model<AnimalDocument>,
   ) {}
 
-  async create(userId: string, createAnimalDto: CreateAnimalDto): Promise<Animal> {
+  async create(
+    userId: string,
+    createAnimalDto: CreateAnimalDto,
+  ): Promise<Animal> {
     const createdAnimal = new this.animalModel({
       ...createAnimalDto,
       userId,
@@ -20,7 +23,7 @@ export class LivestockService {
   }
 
   async findAll(userId: string, farmId?: string): Promise<Animal[]> {
-    const filter: any = { userId };
+    const filter: Record<string, any> = { userId };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
@@ -28,7 +31,7 @@ export class LivestockService {
   }
 
   async countAll(userId: string, farmId?: string): Promise<number> {
-    const filter: any = { userId };
+    const filter: Record<string, any> = { userId };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
@@ -40,21 +43,30 @@ export class LivestockService {
   }
 
   async nextTagId(userId: string, farmId?: string): Promise<string> {
-    const filter: any = { userId, tagId: { $exists: true, $ne: '' } };
+    const filter: Record<string, any> = {
+      userId,
+      tagId: { $exists: true, $ne: '' },
+    };
     if (farmId) {
       filter.farmId = new Types.ObjectId(farmId);
     }
     const animals = await this.animalModel.find(filter, { tagId: 1 }).exec();
     let max = 0;
     for (const a of animals) {
-      const n = parseInt((a as any).tagId, 10);
+      const n = parseInt((a as unknown as { tagId: string }).tagId, 10);
       if (!isNaN(n) && n > max) max = n;
     }
     return String(max + 1).padStart(6, '0');
   }
 
-  async update(id: string, userId: string, dto: Partial<CreateAnimalDto>): Promise<Animal | null> {
-    return this.animalModel.findOneAndUpdate({ _id: id, userId }, dto, { new: true }).exec();
+  async update(
+    id: string,
+    userId: string,
+    dto: Partial<CreateAnimalDto>,
+  ): Promise<Animal | null> {
+    return this.animalModel
+      .findOneAndUpdate({ _id: id, userId }, dto, { new: true })
+      .exec();
   }
 
   async remove(id: string, userId: string): Promise<void> {
@@ -62,6 +74,8 @@ export class LivestockService {
   }
 
   async removeAllByFarm(farmId: string, userId: string): Promise<void> {
-    await this.animalModel.deleteMany({ farmId: new Types.ObjectId(farmId), userId }).exec();
+    await this.animalModel
+      .deleteMany({ farmId: new Types.ObjectId(farmId), userId })
+      .exec();
   }
 }

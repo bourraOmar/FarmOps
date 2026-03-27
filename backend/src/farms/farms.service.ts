@@ -6,9 +6,7 @@ import { CreateFarmDto } from './dto/create-farm.dto';
 
 @Injectable()
 export class FarmsService {
-  constructor(
-    @InjectModel(Farm.name) private farmModel: Model<FarmDocument>,
-  ) {}
+  constructor(@InjectModel(Farm.name) private farmModel: Model<FarmDocument>) {}
 
   async create(userId: string, dto: CreateFarmDto): Promise<Farm> {
     return new this.farmModel({ ...dto, userId }).save();
@@ -26,12 +24,14 @@ export class FarmsService {
     return farm;
   }
 
-  async update(id: string, userId: string, dto: Partial<CreateFarmDto>): Promise<Farm | null> {
-    const farm = await this.farmModel.findOneAndUpdate(
-      { _id: id, userId },
-      dto,
-      { new: true },
-    ).exec();
+  async update(
+    id: string,
+    userId: string,
+    dto: Partial<CreateFarmDto>,
+  ): Promise<Farm | null> {
+    const farm = await this.farmModel
+      .findOneAndUpdate({ _id: id, userId }, dto, { new: true })
+      .exec();
     if (!farm) {
       throw new NotFoundException('Farm not found');
     }
@@ -39,7 +39,9 @@ export class FarmsService {
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const result = await this.farmModel.findOneAndDelete({ _id: id, userId }).exec();
+    const result = await this.farmModel
+      .findOneAndDelete({ _id: id, userId })
+      .exec();
     if (!result) {
       throw new NotFoundException('Farm not found');
     }
