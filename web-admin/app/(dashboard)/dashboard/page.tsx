@@ -179,8 +179,8 @@ export default function DashboardPage() {
                     tickFormatter={(value) => `${value}L`}
                   />
                   <Tooltip
-                    formatter={(value: number) => [`${formatNumber(value)} L`, 'Production']}
-                    labelFormatter={(label) => formatDate(label)}
+                    formatter={(value) => [`${formatNumber(Number(value))} L`, 'Production']}
+                    labelFormatter={(label) => formatDate(String(label))}
                   />
                   <Bar
                     dataKey="totalLiters"
