@@ -204,7 +204,7 @@ export default function LoginPage() {
 
           <div className="mt-14 text-center">
             <p className="text-xs text-gray-400">
-              Besoin d'aide technique ?{" "}
+              Besoin d&apos;aide technique ?{" "}
               <Link
                 href="#"
                 className="text-green-600 font-bold hover:underline"

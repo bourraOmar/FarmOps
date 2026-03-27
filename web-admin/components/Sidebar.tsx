@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -10,7 +10,6 @@ import {
   Beef,
   Droplets,
   Warehouse,
-  Settings,
   LogOut,
   Sun,
   Moon
@@ -22,19 +21,18 @@ const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Load user from localStorage
+  const [user] = useState<User | null>(() => {
+    if (typeof window === 'undefined') return null;
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        setUser(JSON.parse(userStr));
+        return JSON.parse(userStr) as User;
       } catch (error) {
         console.error('Failed to parse user data:', error);
       }
     }
-  }, []);
+    return null;
+  });
 
   const handleLogout = async () => {
     await apiClient.logout();

@@ -6,10 +6,6 @@ import {
   Plus, 
   MapPin, 
   Beef, 
-  FileText, 
-  HeartPulse, 
-  History, 
-  SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
   Loader2
@@ -40,8 +36,8 @@ export default function LivestockPage() {
       setTotalPages(data.totalPages);
       setTotalRecords(data.total);
       setPage(data.page);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load livestock data');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load livestock data');
     } finally {
       setLoading(false);
     }
@@ -122,7 +118,7 @@ export default function LivestockPage() {
         {loading ? (
           <div className="flex-1 flex flex-col justify-center items-center py-20">
             <Loader2 className="w-8 h-8 text-green-500 animate-spin mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">Chargement de l'inventaire...</p>
+            <p className="text-gray-500 dark:text-gray-400">Chargement de l&apos;inventaire...</p>
           </div>
         ) : error ? (
           <div className="flex-1 flex flex-col justify-center items-center py-20">
@@ -140,7 +136,7 @@ export default function LivestockPage() {
               <Beef className="w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">Aucun animal trouvé</p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">L'inventaire est actuellement vide.</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">L&apos;inventaire est actuellement vide.</p>
           </div>
         ) : (
           <div className="overflow-x-auto flex-1">
