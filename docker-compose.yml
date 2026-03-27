@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  database:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    depends_on:
+      - database
+    environment:
+      - MONGODB_URI=mongodb://database:27017/farmops
+      # Use defaults or add other environment variables like JWT_SECRET if required
+    restart: always
+
+  web-admin:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      # Use backend container name for server-side fetching, but localhost for client-side matching (unless reverse proxied)
+      # Usually Next.js needs NEXT_PUBLIC_ variables that are replaced at build time, so for Next.js it might need to know the public URL of the backend at build time. 
+      # With standalone setup, we might need a different approach, but standard Next.js handles it.
+      - NEXT_PUBLIC_API_URL=http://localhost:3005
+    restart: always
+
+volumes:
+  mongodb_data:
