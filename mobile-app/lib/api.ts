@@ -1,7 +1,9 @@
 import axios, { AxiosInstance } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://10.30.250.161:3005'; // Backend local network IP // NOTE: Switch to https://fresh-parts-press.loca.lt if network blocks it
+// const API_BASE_URL = 'http://10.30.250.161:3005'; // Backend local network IP // NOTE: Switch to https://fresh-parts-press.loca.lt if network blocks it
+
+const API_BASE_URL = 'http://192.168.8.101:3005'; // Backend local network IP // NOTE: Switch to https://fresh-parts-press.loca.lt if network blocks it
 
 export interface User {
   _id: string;

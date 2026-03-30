@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Sprout, Clock, ArrowLeft } from 'lucide-react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -108,8 +109,10 @@ export default function SignupScreen() {
         
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-             <Sprout size={32} color="#77B254" />
+             <Sprout size={32} color="#00E632" />
           </View>
+          <Text style={styles.appName}>Create Account</Text>
+          <Text style={styles.appTagline}>Join FarmOps to get started</Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -120,7 +123,7 @@ export default function SignupScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your full name"
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#5A7A60"
                 value={form.fullName}
                 onChangeText={v => setForm({...form, fullName: v})}
                 editable={!loading}
@@ -134,7 +137,7 @@ export default function SignupScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email address"
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#5A7A60"
                 value={form.email}
                 onChangeText={v => setForm({...form, email: v})}
                 autoCapitalize="none"
@@ -150,7 +153,7 @@ export default function SignupScreen() {
                <TextInput
                  style={styles.input}
                  placeholder="Enter your phone number"
-                 placeholderTextColor="#A0A0A0"
+                 placeholderTextColor="#5A7A60"
                  value={form.phone}
                  onChangeText={v => setForm({...form, phone: v})}
                  keyboardType="phone-pad"
@@ -165,7 +168,7 @@ export default function SignupScreen() {
                <TextInput
                  style={styles.input}
                  placeholder="Enter your national ID"
-                 placeholderTextColor="#A0A0A0"
+                 placeholderTextColor="#5A7A60"
                  value={form.cin}
                  onChangeText={v => setForm({...form, cin: v})}
                  editable={!loading}
@@ -179,14 +182,14 @@ export default function SignupScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Create a password"
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#5A7A60"
                 value={form.password}
                 onChangeText={v => setForm({...form, password: v})}
                 secureTextEntry={!showPassword}
                 editable={!loading}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                {showPassword ? <EyeOff size={20} color="#A0A0A0" /> : <Eye size={20} color="#A0A0A0" />}
+                {showPassword ? <EyeOff size={20} color="#8BA890" /> : <Eye size={20} color="#8BA890" />}
               </TouchableOpacity>
             </View>
           </View>
@@ -197,7 +200,7 @@ export default function SignupScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Confirm your password"
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#5A7A60"
                 value={form.confirm}
                 onChangeText={v => setForm({...form, confirm: v})}
                 secureTextEntry={!showPassword}
@@ -210,7 +213,7 @@ export default function SignupScreen() {
             <Checkbox
               value={agree}
               onValueChange={setAgree}
-              color={agree ? '#77B254' : undefined}
+              color={agree ? '#00E632' : undefined}
               style={styles.checkbox}
             />
             <Text style={styles.termsText}>
@@ -219,7 +222,14 @@ export default function SignupScreen() {
           </View>
 
           <TouchableOpacity style={styles.signupButton} onPress={handleSignup} disabled={loading}>
-            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.signupButtonText}>Sign Up</Text>}
+            <LinearGradient
+              colors={['#00E632', '#00C72A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.signupButtonGradient}
+            >
+              {loading ? <ActivityIndicator color="#051207" /> : <Text style={styles.signupButtonText}>Sign Up</Text>}
+            </LinearGradient>
           </TouchableOpacity>
 
           <View style={styles.orSection}>
@@ -231,7 +241,7 @@ export default function SignupScreen() {
           <View style={styles.socialRow}>
              <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="facebook-f" size={24} color="#3b5998" /></TouchableOpacity>
              <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="google" size={24} color="#DB4437" /></TouchableOpacity>
-             <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="apple" size={24} color="#000" /></TouchableOpacity>
+             <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="apple" size={24} color="#FFFFFF" /></TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
@@ -250,7 +260,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#051207',
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -265,9 +275,22 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#F0F9F1',
+    backgroundColor: 'rgba(0, 230, 50, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 230, 50, 0.25)',
+  },
+  appName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  appTagline: {
+    fontSize: 14,
+    color: '#8BA890',
   },
   formContainer: {
     width: '100%',
@@ -278,28 +301,23 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#E0E8E2',
     marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 30,
-    backgroundColor: '#FFFFFF',
+    borderColor: '#1D3B24',
+    borderRadius: 16,
+    backgroundColor: '#102815',
     height: 50,
     paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
   },
   input: {
     flex: 1,
     fontSize: 14,
-    color: '#333',
+    color: '#FFFFFF',
     height: '100%',
   },
   eyeIcon: {
@@ -315,35 +333,33 @@ const styles = StyleSheet.create({
   checkbox: {
     marginRight: 10,
     borderRadius: 4,
-    borderColor: '#E8E8E8',
+    borderColor: '#1D3B24',
     width: 20,
     height: 20,
   },
   termsText: {
     fontSize: 12,
-    color: '#8B8B8B',
+    color: '#8BA890',
     flex: 1,
     flexWrap: 'wrap',
   },
   linkText: {
-    color: '#77B254',
+    color: '#00E632',
     fontWeight: 'bold',
   },
   signupButton: {
-    backgroundColor: '#77B254',
+    borderRadius: 28,
+    overflow: 'hidden',
+    marginBottom: 32,
+  },
+  signupButtonGradient: {
     height: 56,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: "#77B254",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-    marginBottom: 32,
   },
   signupButtonText: {
-    color: '#FFFFFF',
+    color: '#051207',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -355,11 +371,11 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: '#1D3B24',
   },
   orText: {
     marginHorizontal: 16,
-    color: '#8B8B8B',
+    color: '#8BA890',
     fontSize: 14,
   },
   socialRow: {
@@ -372,11 +388,11 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#102815',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#EEEEEE',
+    borderColor: '#1D3B24',
   },
   footer: {
     flexDirection: 'row',
@@ -385,11 +401,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    color: '#8B8B8B',
+    color: '#8BA890',
     fontSize: 14,
   },
   loginLink: {
-    color: '#77B254',
+    color: '#00E632',
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -398,7 +414,7 @@ const styles = StyleSheet.create({
 const pendingStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1205',
+    backgroundColor: '#051207',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,
@@ -458,13 +474,13 @@ const pendingStyles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: '#333',
+    backgroundColor: '#1D3B24',
     borderWidth: 2,
-    borderColor: '#555',
+    borderColor: '#2D4B34',
   },
   stepDotDone: {
-    backgroundColor: '#22C55E',
-    borderColor: '#22C55E',
+    backgroundColor: '#00E632',
+    borderColor: '#00E632',
   },
   stepDotActive: {
     backgroundColor: '#F59E0B',
@@ -478,12 +494,12 @@ const pendingStyles = StyleSheet.create({
   },
   stepStatus: {
     fontSize: 13,
-    color: '#888',
+    color: '#8BA890',
   },
   stepLine: {
     width: 2,
     height: 20,
-    backgroundColor: '#333',
+    backgroundColor: '#1D3B24',
     marginLeft: 6,
     marginVertical: 4,
   },

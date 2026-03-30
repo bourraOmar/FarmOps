@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Sprout, ShieldX, Clock, ArrowLeft } from 'lucide-react-native'; 
 import { FontAwesome5, FontAwesome6 } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -56,8 +57,10 @@ export default function LoginScreen() {
         
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-             <Sprout size={40} color="#77B254" />
+             <Sprout size={40} color="#00E632" />
           </View>
+          <Text style={styles.appName}>FarmOps</Text>
+          <Text style={styles.appTagline}>Sign in to manage your farms</Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -68,7 +71,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email address"
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#5A7A60"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -84,14 +87,14 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your password"
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#5A7A60"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 editable={!loading}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                {showPassword ? <EyeOff size={20} color="#A0A0A0" /> : <Eye size={20} color="#A0A0A0" />}
+                {showPassword ? <EyeOff size={20} color="#8BA890" /> : <Eye size={20} color="#8BA890" />}
               </TouchableOpacity>
             </View>
           </View>
@@ -101,7 +104,7 @@ export default function LoginScreen() {
               <Checkbox
                 value={rememberMe}
                 onValueChange={setRememberMe}
-                color={rememberMe ? '#77B254' : undefined}
+                color={rememberMe ? '#00E632' : undefined}
                 style={styles.checkbox}
               />
               <Text style={styles.rememberText}>Remember me</Text>
@@ -112,7 +115,14 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.loginButtonText}>Login</Text>}
+            <LinearGradient
+              colors={['#00E632', '#00C72A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.loginButtonGradient}
+            >
+              {loading ? <ActivityIndicator color="#051207" /> : <Text style={styles.loginButtonText}>Login</Text>}
+            </LinearGradient>
           </TouchableOpacity>
 
           <View style={styles.orSection}>
@@ -124,7 +134,7 @@ export default function LoginScreen() {
           <View style={styles.socialRow}>
              <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="facebook-f" size={24} color="#3b5998" /></TouchableOpacity>
              <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="google" size={24} color="#DB4437" /></TouchableOpacity>
-             <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="apple" size={24} color="#000" /></TouchableOpacity>
+             <TouchableOpacity style={styles.socialBtn}><FontAwesome5 name="apple" size={24} color="#FFFFFF" /></TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
@@ -295,7 +305,7 @@ const statusModalStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#051207',
   },
   scrollContent: {
     flexGrow: 1,
@@ -312,9 +322,22 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#F0F9F1',
+    backgroundColor: 'rgba(0, 230, 50, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 230, 50, 0.25)',
+  },
+  appName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  appTagline: {
+    fontSize: 14,
+    color: '#8BA890',
   },
   formContainer: {
     width: '100%',
@@ -325,28 +348,23 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#E0E8E2',
     marginBottom: 8,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 30,
-    backgroundColor: '#FFFFFF',
+    borderColor: '#1D3B24',
+    borderRadius: 16,
+    backgroundColor: '#102815',
     height: 56,
     paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: '#FFFFFF',
     height: '100%',
   },
   eyeIcon: {
@@ -365,34 +383,32 @@ const styles = StyleSheet.create({
   checkbox: {
     marginRight: 8,
     borderRadius: 4,
-    borderColor: '#E8E8E8',
+    borderColor: '#1D3B24',
     width: 20,
     height: 20,
   },
   rememberText: {
-    color: '#8B8B8B',
+    color: '#8BA890',
     fontSize: 14,
   },
   forgotPasswordText: {
-    color: '#F25C5C',
+    color: '#00E632',
     fontSize: 14,
     fontWeight: '500',
   },
   loginButton: {
-    backgroundColor: '#77B254',
+    borderRadius: 28,
+    overflow: 'hidden',
+    marginBottom: 32,
+  },
+  loginButtonGradient: {
     height: 56,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: "#77B254",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-    marginBottom: 32,
   },
   loginButtonText: {
-    color: '#FFFFFF',
+    color: '#051207',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -404,11 +420,11 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: '#1D3B24',
   },
   orText: {
     marginHorizontal: 16,
-    color: '#8B8B8B',
+    color: '#8BA890',
     fontSize: 14,
   },
   socialRow: {
@@ -421,24 +437,23 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#102815',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#EEEEEE',
+    borderColor: '#1D3B24',
   },
   footer: {
-
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   footerText: {
-    color: '#8B8B8B',
+    color: '#8BA890',
     fontSize: 14,
   },
   signupLink: {
-    color: '#77B254',
+    color: '#00E632',
     fontWeight: 'bold',
     fontSize: 14,
   },
