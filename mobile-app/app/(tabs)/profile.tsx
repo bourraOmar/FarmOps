@@ -1,12 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../lib/api';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { logout, user } = useAuth(); // Destructuring user too to display name dynamically if needed
+  const { logout, user } = useAuth();
+
+  const [stats, setStats] = useState({ totalAnimals: 0, totalWorkers: 0, totalFarms: 0 });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadStats = useCallback(async () => {
+    try {
+      const [livestockRes, workersRes, farmsRes] = await Promise.all([
+        apiClient.getDashboardStats(),
+        apiClient.getWorkers(),
+        apiClient.getFarms(),
+      ]);
+      setStats({
+        totalAnimals: livestockRes.totalAnimals ?? 0,
+        totalWorkers: Array.isArray(workersRes) ? workersRes.length : 0,
+        totalFarms: Array.isArray(farmsRes) ? farmsRes.length : 0,
+      });
+    } catch (e) {
+      console.error('[Profile] Failed to load stats:', e);
+    } finally {
+      setLoadingStats(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoadingStats(true);
+      loadStats();
+    }, [loadStats])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadStats();
+    setRefreshing(false);
+  }, [loadStats]);
 
   const handleLogout = () => {
     Alert.alert(
@@ -31,8 +68,15 @@ export default function ProfileScreen() {
     );
   };
 
-  const renderMenuItem = (icon: keyof typeof Ionicons.glyphMap, title: string, subtitle?: string) => (
-    <TouchableOpacity style={styles.menuItem}>
+  const getInitials = (name?: string) => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return parts[0][0].toUpperCase();
+  };
+
+  const renderMenuItem = (icon: keyof typeof Ionicons.glyphMap, title: string, subtitle?: string, onPress?: () => void) => (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
       <View style={styles.menuIconContainer}>
         <Ionicons name={icon} size={22} color="#00E632" />
       </View>
@@ -44,9 +88,16 @@ export default function ProfileScreen() {
     </TouchableOpacity>
   );
 
+  const displayRole = user?.role === 'farmer' ? 'Farm Owner' : user?.role || 'User';
+
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#00E632" />
+        }
+      >
         
         {/* Header */}
         <View style={styles.header}>
@@ -57,44 +108,44 @@ export default function ProfileScreen() {
         <View style={styles.userCard}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-               <Ionicons name="person" size={40} color="#0D1F12" />
+               <Text style={styles.avatarText}>{getInitials(user?.fullName)}</Text>
             </View>
             <View style={styles.badge}>
               <Ionicons name="checkmark" size={12} color="#051207" />
             </View>
           </View>
-          <Text style={styles.userName}>{user?.fullName || 'Omar Bourra'}</Text>
-          <Text style={styles.userRole}>{user?.role || 'Farm Owner'}</Text>
-          <View style={styles.farmTag}>
-            <Ionicons name="location-outline" size={14} color="#8BA890" style={{marginRight: 4}} />
-            <Text style={styles.farmName}>Green Valley Farm</Text>
-          </View>
+          <Text style={styles.userName}>{user?.fullName || 'User'}</Text>
+          <Text style={styles.userRole}>{displayRole}</Text>
         </View>
 
-        {/* Statistics Row (Optional Dashboard summary) */}
+        {/* Statistics Row */}
         <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>124</Text>
-            <Text style={styles.statLabel}>Cattle</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>18</Text>
-            <Text style={styles.statLabel}>Events</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>3</Text>
-            <Text style={styles.statLabel}>Staff</Text>
-          </View>
+          {loadingStats ? (
+            <ActivityIndicator color="#00E632" style={{ paddingVertical: 10 }} />
+          ) : (
+            <>
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>{stats.totalFarms}</Text>
+                <Text style={styles.statLabel}>Farms</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>{stats.totalAnimals}</Text>
+                <Text style={styles.statLabel}>Animals</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>{stats.totalWorkers}</Text>
+                <Text style={styles.statLabel}>Workers</Text>
+              </View>
+            </>
+          )}
         </View>
 
         {/* Menu Sections */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>ACCOUNT</Text>
-          {renderMenuItem("person-outline", "Personal Information", "Edit your details")}
-          {renderMenuItem("shield-checkmark-outline", "Security", "Password & 2FA")}
-          {renderMenuItem("notifications-outline", "Notifications", "Manage alerts")}
+          {renderMenuItem("person-outline", "Personal Information", "Edit your details", () => router.push('/personal-information'))}
         </View>
 
         <View style={styles.section}>
@@ -151,6 +202,11 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: '#102815',
   },
+  avatarText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#051207',
+  },
   badge: {
     position: 'absolute',
     bottom: 0,
@@ -172,23 +228,9 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: 16,
-    color: '#8BA890',
-    marginBottom: 8,
-  },
-  farmTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#102815',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#1D3B24',
-  },
-  farmName: {
-    color: '#8BA890',
-    fontSize: 14,
-    fontWeight: '500', 
+    color: '#00E632',
+    marginBottom: 4,
+    fontWeight: '600',
   },
   statsRow: {
     flexDirection: 'row',
